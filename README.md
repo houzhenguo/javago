@@ -3,3 +3,4 @@ welcome to houzhenguo java learning
 
 ## JVM相关   
 - [JVM运行时内存模型](./docs/jvm/jvm系列(一)内存结构.md)
+- [JVMGC](./docs/jvm/jvm系列(二)GC.md)
