@@ -7,3 +7,4 @@ welcome to houzhenguo java learning
 
 ## Java 并发相关
 - [Java并发基础知识](./docs/java/multithread/currentbase.md)
+- [ThreadLocal使用](./docs/java/multithread/threadlocal.md)
