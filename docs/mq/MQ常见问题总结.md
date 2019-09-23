@@ -1,5 +1,7 @@
 # RabbitMQ
 
+![RabbitMQ_Mind](./images/rabbitmq-mind-question.png)
+
 ## MQ应用场景
 
 **解耦**、**异步**、**削峰**
