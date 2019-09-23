@@ -4,6 +4,8 @@ welcome to houzhenguo java learning
 ## JVM相关   
 - [JVM运行时内存模型](./docs/jvm/jvm系列(一)内存结构.md)
 - [JVMGC](./docs/jvm/jvm系列(二)GC.md)
+- [Java堆栈信息](./docs/jvm/Java堆栈信息.md)
+- [Java定位CPU高的线程](./docs/jvm/Java定位CPU高的线程.md)
 
 ## Java 并发相关
 - [Java并发基础知识](./docs/java/multithread/currentbase.md)
@@ -13,3 +15,19 @@ welcome to houzhenguo java learning
 ## Java8 相关
 
 - [Java并发基础知识](./docs/java/java8/java8Tutotial.md)
+
+## Java 集合相关
+
+## Java基础相关
+
+- [java注解](./docs/java/base/annotation.md)
+
+## 数据库相关
+
+- [redis数据库](./docs/redis/redis.md)
+
+## MQ相关
+
+- [MQ相关问题总结](./docs/mq/MQ常见问题总结.md)
+- [RabbitMQ基础概念](./docs/mq/RabbitMQ基础概念.md)
+- [RabbitMQ的使用安装](./docs/mq/RabbitMQ的使用安装.md)
