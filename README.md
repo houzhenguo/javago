@@ -31,3 +31,10 @@ welcome to houzhenguo java learning
 - [MQ相关问题总结](./docs/mq/MQ常见问题总结.md)
 - [RabbitMQ基础概念](./docs/mq/RabbitMQ基础概念.md)
 - [RabbitMQ的使用安装](./docs/mq/RabbitMQ的使用安装.md)
+
+## Dubbo相关
+- [Dubbo基本](./docs/dubbo/dubbo.md)
+- [SpringBoot与Dubbo搭建分布式](./docs/dubbo/springboot-dubbo.md)
+
+## 算法相关
+- [Bloom_Filter](./docs/datastructure/guava-bloom-filter.md)

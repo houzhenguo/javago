@@ -2,6 +2,18 @@
 
 文章来源 https://www.cnblogs.com/acm-bingzi/p/javaAnnotation.html
 
+<!-- TOC -->
+
+- [注解](#注解)
+    - [注解Annotation实现原理与自定义注解例子](#注解annotation实现原理与自定义注解例子)
+    - [什么是注解？](#什么是注解)
+    - [注解的用处：](#注解的用处)
+    - [常见标准的Annotation：](#常见标准的annotation)
+    - [自定义注解：](#自定义注解)
+    - [自定义注解实例：](#自定义注解实例)
+
+<!-- /TOC -->
+
 # 注解
 
 ## 注解Annotation实现原理与自定义注解例子
