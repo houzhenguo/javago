@@ -38,3 +38,14 @@ welcome to houzhenguo java learning
 
 ## 算法相关
 - [Bloom_Filter](./docs/datastructure/guava-bloom-filter.md)
+- [LRU的实现](./docs/datastructure/LRU_MY.md)
+- [AVL与红黑树](./docs/garbage/AVL与红黑树.md)
+- [生产者消费者模型](./docs/garbage/生产者消费者模型.md)
+
+## Netty相关
+
+- [Netty](./docs/netty/netty到底是什么.md)
+
+## Redis相关
+
+- [Redis为什么使用跳表不使用红黑树hash等](./docs/redis/Redis为什么用跳表而不使用平衡树.md)
