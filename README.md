@@ -31,6 +31,7 @@ welcome to houzhenguo java learning
 - [MQ相关问题总结](./docs/mq/MQ常见问题总结.md)
 - [RabbitMQ基础概念](./docs/mq/RabbitMQ基础概念.md)
 - [RabbitMQ的使用安装](./docs/mq/RabbitMQ的使用安装.md)
+- [如何保证MQ的高可用性](./docs/mq/如何保证MQ的高可用性.md)
 
 ## Dubbo相关
 - [Dubbo基本](./docs/dubbo/dubbo.md)
@@ -41,6 +42,7 @@ welcome to houzhenguo java learning
 - [LRU的实现](./docs/datastructure/LRU_MY.md)
 - [AVL与红黑树](./docs/garbage/AVL与红黑树.md)
 - [生产者消费者模型](./docs/garbage/生产者消费者模型.md)
+- [归并排序原理以及代码实现](./docs/datastructure/sort/归并排序.md)
 
 ## Netty相关
 
