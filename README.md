@@ -11,6 +11,8 @@ welcome to houzhenguo java learning
 - [Java并发基础知识](./docs/java/multithread/currentbase.md)
 - [ThreadLocal使用](./docs/java/multithread/threadlocal.md)
 - [sychronized关键字](./docs/java/multithread/synchronized.md)
+- [线程池](./docs/java/multithread/threadpool.md)
+- [BlockingQueue](./docs/java/multithread/BlockingQueue.md)
 
 ## Java8 相关
 
