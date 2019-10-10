@@ -53,3 +53,8 @@ welcome to houzhenguo java learning
 ## Redis相关
 
 - [Redis为什么使用跳表不使用红黑树hash等](./docs/redis/Redis为什么用跳表而不使用平衡树.md)
+
+## Linux相关
+
+- [Linux_Shell文本处理](./docs/linux/Linux_Shell文本处理.md)
+- [日志分析命令awk基础用法](./docs/linux/日志分析命令awk基础用法.md)
