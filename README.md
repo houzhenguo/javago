@@ -27,6 +27,7 @@ welcome to houzhenguo java learning
 ## 数据库相关
 
 - [redis数据库](./docs/redis/redis.md)
+- [Mysql索引原理与优化](./docs/db/mysql/mysql索引和sql调优.md)
 
 ## MQ相关
 
@@ -60,3 +61,7 @@ welcome to houzhenguo java learning
 
 - [Linux_Shell文本处理](./docs/linux/Linux_Shell文本处理.md)
 - [日志分析命令awk基础用法](./docs/linux/日志分析命令awk基础用法.md)
+
+## interview
+
+- [美团Java](./docs/niuke/meituan.md)

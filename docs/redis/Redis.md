@@ -1,5 +1,22 @@
 
+<!-- TOC -->
 
+- [redis 简介](#redis-简介)
+- [为什么要用 redis/为什么要用缓存](#为什么要用-redis为什么要用缓存)
+- [为什么要用 redis 而不用 map/guava 做缓存?](#为什么要用-redis-而不用-mapguava-做缓存)
+- [redis 的线程模型](#redis-的线程模型)
+- [redis 和 memcached 的区别](#redis-和-memcached-的区别)
+- [redis 常见数据结构以及使用场景分析](#redis-常见数据结构以及使用场景分析)
+    - [1.String](#1string)
+    - [2.Hash](#2hash)
+    - [3.List](#3list)
+    - [4.Set](#4set)
+    - [5.Sorted Set](#5sorted-set)
+- [redis 设置过期时间](#redis-设置过期时间)
+- [redis 内存淘汰机制(MySQL里有2000w数据，Redis中只存20w的数据，如何保证Redis中的数据都是热点数据?)](#redis-内存淘汰机制mysql里有2000w数据redis中只存20w的数据如何保证redis中的数据都是热点数据)
+- [redis 持久化机制(怎么保证 redis 挂掉之后再重启数据可以进行恢复)](#redis-持久化机制怎么保证-redis-挂掉之后再重启数据可以进行恢复)
+
+<!-- /TOC -->
 ### redis 简介
 
 简单来说 redis 就是一个数据库，不过与传统数据库不同的是 redis 的数据是存在内存中的，所以读写速度非常快，因此 redis 被广泛应用于缓存方向。另外，redis 也经常用来做分布式锁。redis 提供了多种数据类型来支持不同的业务场景。除此之外，redis 支持事务 、持久化、LUA脚本、LRU驱动事件、多种集群方案。 
