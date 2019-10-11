@@ -16,12 +16,16 @@
 
 MySQL 中有四种事务隔离级别，它们分别是：
 
-- read uncommited：未提交读，读到未提交数据；
-- read committed：读已提交，也叫不可重复读，两次读取到的数据不一致；
-- repetable read：可重复读；
+[参考文章链接](https://www.cnblogs.com/ubuntu1/p/8999403.html)
+
+- read uncommited：未提交读，读到未提交数据；（导致的问题：读到别人未提交的就是脏读）
+- read committed：读已提交，也叫不可重复读，两次读取到的数据不一致；(导致的问题是不可重复读),读的时候要等别人的修改事务提交之后才能读。
+- repetable read：可重复读；（ 解决不可重复读的问题）-> 出现幻读
 - serializable：串行化，读写数据都会锁住整张表，数据操作不会出错，但并发性能极低，开发中很少用到。
 
 MySQL 默认使用 REPEATABLE-READ 的事务隔离级别
+
+值得一提的是：大多数数据库默认的事务隔离级别是Read committed，比如Sql Server , Oracle。Mysql的默认隔离级别是Repeatable read。
 
 ## 幻读和不可重复读的区别？
 
