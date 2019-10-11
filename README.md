@@ -70,3 +70,7 @@ welcome to houzhenguo java learning
 ## interview
 
 - [美团Java](./docs/niuke/meituan.md)
+
+## 分布式相关
+
+- [美团分布式id_Leaf](./docs/distributed/美团点评分布式ID_Leaf.md)
