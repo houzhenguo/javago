@@ -48,6 +48,8 @@ welcome to houzhenguo java learning
 - [什么是B树](./docs/datastructure/tree/什么是B树.md)
 - [什么是B+树](./docs/datastructure/tree/什么是B+树.md)
 
+- [漫画算法](./docs/datastructure/other/漫画算法.md)
+
 ## Netty相关
 
 - [Netty](./docs/netty/netty到底是什么.md)
