@@ -16,7 +16,7 @@ welcome to houzhenguo java learning
 
 ## Java8 相关
 
-- [Java并发基础知识](./docs/java/java8/java8Tutotial.md)
+- [Java8](./docs/java/java8/java8Tutotial.md)
 
 ## Java 集合相关
 
@@ -26,7 +26,6 @@ welcome to houzhenguo java learning
 
 ## 数据库相关
 
-- [redis数据库](./docs/redis/redis.md)
 - [Mysql索引原理与优化](./docs/db/mysql/mysql索引和sql调优.md)
 
 ## MQ相关
@@ -55,7 +54,10 @@ welcome to houzhenguo java learning
 
 ## Redis相关
 
+- [Redis](./docs/redis/Redis.md)
 - [Redis为什么使用跳表不使用红黑树hash等](./docs/redis/Redis为什么用跳表而不使用平衡树.md)
+- [数据库与缓存数据一致性问题](./docs/redis/数据库与缓存数据一致性问题.md)
+
 
 ## Linux相关
 
