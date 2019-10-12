@@ -57,6 +57,7 @@ welcome to houzhenguo java learning
 - [Redis](./docs/redis/Redis.md)
 - [Redis为什么使用跳表不使用红黑树hash等](./docs/redis/Redis为什么用跳表而不使用平衡树.md)
 - [数据库与缓存数据一致性问题](./docs/redis/数据库与缓存数据一致性问题.md)
+- [Redis持久化](./docs/redis/Redis持久化.md)
 
 
 ## Linux相关
