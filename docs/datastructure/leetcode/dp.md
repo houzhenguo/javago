@@ -56,7 +56,7 @@ public int uniquePaths(int m, int n) {
 }
 ```
 
-## 爬楼梯问题
+## 2. 爬楼梯问题
 
 [70. Climbing Stairs (Easy)](https://leetcode.com/problems/climbing-stairs/description/)
 
@@ -87,3 +87,54 @@ class Solution {
 2. 从第9个台阶迈一步到第10个台阶
 
 F(n) = F(n-1) + F(n-2);所以到达第10个台阶的方式 就是到达第8个台阶的次数与到达第9个台阶次数之和。
+
+## 3.  强盗抢劫问题
+
+[198. House Robber (Easy)](https://leetcode.com/problems/house-robber/description/)
+
+题目描述：抢劫一排住户，但是不能抢邻近的住户，求最大抢劫量。
+
+定义 dp 数组用来存储最大的抢劫量，其中 dp[i] 表示抢到第 i 个住户时的最大抢劫量。
+
+由于不能抢劫邻近住户，如果抢劫了第 i -1 个住户，那么就不能再抢劫第 i 个住户.注意存在这种问题[2,1,1,2] 这个时候抢到的最大值为 4；
+
+Leetcode最优易懂方法:
+
+```java
+public int rob(int[] nums) {
+    int [][] dp = new int[num.length +1][2];
+    for (int i=1; i<= num.length;i++) {
+        dp[i][0] = Math.max(dp[i-1][0],dp[i-1][1]);
+        dp[i][1] = num[i-1] + dp[i-1][0];
+    }
+    return Math.max(dp[nums.length][0], dp[num.length][1]);
+}
+
+// dp[i][1] means we rob the current house and dp[i][0] means we don't,
+
+//这个解决方案存在争议,
+//https://leetcode.com/problems/house-robber/discuss/55681/Java-O(n)-solution-space-O(1)
+
+// 这是我自己写的，存在的问题是 [2,1,1,2]的问题
+class Solution {
+    public int rob(int[] nums) {
+        if (nums.length == 0) {
+            return 0;
+        }
+        if (nums.length == 1) {
+            return nums[0];
+        }
+        int[] dp = new int[nums.length];
+        dp[0] = nums[0];
+        dp[1] = nums[1];
+        if (nums.length == 2) {
+            return Math.max(dp[0],dp[1]);
+        }
+        for (int i=2;i < nums.length;i++) {
+            dp[i] = Math.max(dp[i-2] + nums[i], dp[i-1]);
+        }
+        return dp[dp.length -1];
+    }
+}
+```
+

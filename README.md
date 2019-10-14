@@ -49,6 +49,7 @@ welcome to houzhenguo java learning
 - [什么是B+树](./docs/datastructure/tree/什么是B+树.md)
 
 - [漫画算法](./docs/datastructure/other/漫画算法.md)
+- [一致Hash算法](./docs/datastructure/other/一致hash算法.md)
 
 ## Netty相关
 
@@ -60,6 +61,7 @@ welcome to houzhenguo java learning
 - [Redis为什么使用跳表不使用红黑树hash等](./docs/redis/Redis为什么用跳表而不使用平衡树.md)
 - [数据库与缓存数据一致性问题](./docs/redis/数据库与缓存数据一致性问题.md)
 - [Redis持久化](./docs/redis/Redis持久化.md)
+- [缓存雪崩缓存穿透](./docs/redis/缓存雪崩缓存穿透.md)
 
 
 ## Linux相关
