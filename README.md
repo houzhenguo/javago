@@ -6,6 +6,7 @@ welcome to houzhenguo java learning
 - [JVMGC](./docs/jvm/jvm系列(二)GC.md)
 - [Java堆栈信息](./docs/jvm/Java堆栈信息.md)
 - [Java定位CPU高的线程](./docs/jvm/Java定位CPU高的线程.md)
+- [Arthas的研究分析使用](./docs/jvm/Arthas的研究分析使用.md)
 
 ## Java 并发相关
 - [Java并发基础知识](./docs/java/multithread/currentbase.md)
