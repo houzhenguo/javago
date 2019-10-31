@@ -15,7 +15,28 @@ touch /home/cola/.ssh/authorized_keys
 # 修改hostname
 hostname
 hostnamectl set-hostname aliyun
+
+# 安装rz sz
+yum -y install lrzsz
+
+# 上传不乱码
+re -be 
+
+# 解压
+unzip arthas-packaging-3.1.4-bin.zip -d arthas-packag
+# 安装jdk https://cloud.tencent.com/developer/article/1447083   获取安装目录，你发现在/usr/lib/jvm目录下可以找到他们。
+yum install -y java-1.8.0-openjdk-devel.x86_64
+
+# 搜索历史命令
+ctrl + r 输入关键字 然后回车
+
+
 ```
+
+tomcat 
+https://www.cnblogs.com/yw-ah/p/9770971.html
+
+/usr/tomcat/apache-tomcat-9.0.27/webapps/docs/appdev
 
 ## linux记录登录ip方法
 PS：Linux用户操作记录一般通过命令history来查看历史记录，但是如果因为某人误操作了删除了重要的数据，这种情况下history命令就不会有什么作用了。以下方法可以实现通过记录登陆IP地址和所有用户登录所操作的日志记录！
