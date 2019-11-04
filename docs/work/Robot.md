@@ -1,4 +1,5 @@
 
+# Robot
 ## Resource 
 
 
@@ -23,3 +24,7 @@
         c. 死循环 blockingQueue中take
         d. 根据msg Class 取出相应的dispatcher策略。RobotThread的构造方法中 RobotThread 传入了策略
         e. RobotThread 中 onRobotEvent .getMsgHandler, on()方法支持机器人。
+
+
+# DS
+
