@@ -26,5 +26,47 @@
         e. RobotThread 中 onRobotEvent .getMsgHandler, on()方法支持机器人。
 
 
-# DS
+## RobotManager 处理消息的过程
 
+1. RobotManager.messageReceived()
+        a. session中塞这一个Robot实例
+        b. 根据 robot的id找到相应的Thread进行处理 (自定义的 RobotThread)
+2.  RobotThread.postDelayMsg 发送消息。 new 一个RobotEvent 对象 。RobotEvent 消息实例会进入到 ActorThread 的 msgQueue 队列中
+3. ActorThread 中 run 方法 死循环 去 take。获取 到RobotEvent 。在dispather中获取到 RobotEvent.class 进行处理。 处理方法在 RobotThread 
+   的构造方法中传入。 on(RobotEvent.class, this:: onRobotEvent) 意味着所有的消息在 RobotEvent进行处理。最终都是调用 RobotEvent 的 onRobotEvent方法。
+4. RobotThread.onRobotEvent(RobotEvent event) 
+        a. pre(msg) 预处理方法 -> 生成相应的 Bean<?> 这个是在robot.bean下面定义的。
+        b. 查找相应bean的on方法。这个东西是在 RobotManager中通过反射生成的。然后进行 反射调用。
+        c. 接下来就是 RobotBase中 on login 一系列的流程处理。每个on有自己发送消息的流程。
+        
+5. Robot 当 最后一个受到 服务器发送的 CmdEnterworld_Re 时候，进行move() 操作 。满血 满速度 无饥饿
+
+
+## 在 启动时候配置 自己需要使用的 Robot的类是哪个
+1. 这个是在 RobotManager 的 onAddSession 中实现。将 相关 的Robot类绑定在Session上面。
+
+
+## 如何在 robot.bean 下面生成相应的 Bean<?>
+
+CmdEnterworld_Re 在哪里定义的没有搜到 ====================================》Q
+
+
+## 如何查看机器人 发送协议的效果
+
+
+
+
+
+
+
+## Move的过程
+
+1. 在 ../res/robot/move.log 中解析出各个参数。
+
+
+
+Q ：
+
+1. 这个log是如何生成的？
+2. RobotBase 中的 CmdDebugGsCmd 中的Id 以及参数的含义
+3. 
