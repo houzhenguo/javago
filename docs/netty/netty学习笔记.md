@@ -22,7 +22,7 @@ WebSocket 相比之前的HTTP1.0 ，是一种升级，可以实现长链接，�
 
 ## Gradle 
 
-gradle 与maven一样，都是一款包的管理工具，但是比maven更加轻量级。需要下载与自己的idea 匹配版本的Gradle，否则可能无法正常加载相关依赖。需要配置相关的环境变量，以及使用auto_import and 使用本地自己部署的gradel。注意，不同版本的gradle 对应的build.gradle的配置文件引入包的方式不同，可以参考给的junit的样子写。至于 包的地址，可以参考 https://search.maven.org
+gradle 与maven一样，都是一款包的管理工具，但是比maven更加轻量级。需要下载与自己的idea 匹配版本的Gradle，否则可能无法正常加载相关依赖。需要配置相关的环境变量，以及使用auto_import and 使用本地自己部署的gradle。注意，不同版本的gradle 对应的build.gradle的配置文件引入包的方式不同，可以参考给的junit的样子写。至于 包的地址，可以参考 https://search.maven.org
 
 ## Git
 
@@ -44,4 +44,17 @@ netty可以作为http服务器 例如 tomcat 不遵守servlet规范 请求路由
 
 curl -X POST "http://localhost:8899"
 
+
+## netty学习方法
+
+不要陷入到细节中，应该先学习应用。否则陷入蒙蔽中。
+
+## WebSocket
+ html5的规范，解决http的无状态问题。
+ http: request -> response 建立连接 。 client -> request -> server handle -> response -> client -> 连接断掉 (http1.0)
+ http 1.1 keepAlive ，建立连接。request -> response 在指定时间内，client还要请求server，不需要重新建立连接。 无法实现服务器的 push技术。 轮询技术早期
+
+ poll 技术：1.无意义返回 2. header 的大小。
+
+ html5 socket的长连接。client and server 平等。 不需要发送 header信息，节省带宽。双向数据通信。
 

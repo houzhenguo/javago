@@ -2,6 +2,7 @@
 ```bash
 # 创建 houzhenguo 并且在指定home目录
 useradd -d /home/houzhenguo houzhenguo
+[root@localhost /]# passwd haha   #为该用户设置密码
 
 # 查看当前用户的分组
 groups
@@ -26,6 +27,8 @@ re -be
 unzip arthas-packaging-3.1.4-bin.zip -d arthas-packag
 # 安装jdk https://cloud.tencent.com/developer/article/1447083   获取安装目录，你发现在/usr/lib/jvm目录下可以找到他们。
 yum install -y java-1.8.0-openjdk-devel.x86_64
+
+# 安装 open jdk11 https://blog.csdn.net/ringliwei/article/details/85260801
 
 # 搜索历史命令
 ctrl + r 输入关键字 然后回车

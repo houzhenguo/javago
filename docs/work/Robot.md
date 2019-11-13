@@ -65,10 +65,25 @@ CmdEnterworld_Re 在哪里定义的没有搜到 ================================
 
 
 
+## GM命令
+
+
+
 Q ：
 
 1. 这个log是如何生成的？
 2. RobotBase 中的 CmdDebugGsCmd 中的Id 以及参数的含义
-3. 
+3. 看代码，发现 每次都有一个 new P().submit();的过程，是多线程处理么。 FDebugCmd 比如 onLeaveTeam submit两次?
 
 -14 182
+
+侯振国：
+1. 熟悉服务器 机器人部分的代码
+2. 体验游戏
+3. 看服务器其他模块的代码 协议处理流程部分
+
+
+## 学到的东西 
+
+Prop = property 参数 
+
