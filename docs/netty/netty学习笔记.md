@@ -58,3 +58,35 @@ curl -X POST "http://localhost:8899"
 
  html5 socket的长连接。client and server 平等。 不需要发送 header信息，节省带宽。双向数据通信。
 
+## ProtocolBuff
+
+1. RMI Remote method invocation, 只针对Java
+
+client: 序列化字节码 
+
+server： 反序列化
+
+rpc 几乎都有 代码生成的过程。在client 称为 stub(庄) server:skeleton(骨架)
+
+序列化与反序列化：也叫做 编码与解码。encode,decode.对象 <---> 字节
+
+RPC: Remote Procedure Call 远程过程调用。与 RMI相比 跨语言。
+
+（序列化的过程？）
+1. 定义一个接口说明文件 ： 描述了对象（结构体），对象成员，接口方法的一系列信息。
+```
+message Person {
+    required int32 id  =1;
+    optional string name =2;
+}
+```
+2. 通过 RPC框架所提供的编译器将接口说明文件编译成具体语言文件
+3. 在客户端与服务器段分别引入 RPC编译器所生成的文件，即可像调用本地方法一样调用远程方法。
+
+编码效率，压缩比例，解码效率，影响传输。这是影响 RPC的选择。
+
+服务与服务之间的调用使用 RPC。
+
+required 必须提供
+
+optional 不是必须的。 后面的数字代表顺序。

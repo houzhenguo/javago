@@ -74,7 +74,7 @@ Q ：
 1. 这个log是如何生成的？
 2. RobotBase 中的 CmdDebugGsCmd 中的Id 以及参数的含义
 3. 看代码，发现 每次都有一个 new P().submit();的过程，是多线程处理么。 FDebugCmd 比如 onLeaveTeam submit两次?
-
+4. Procedure 中 lock之前都会 unlock ,这时候不是别人主动释放的锁？ 工会的锁，role的锁？
 -14 182
 
 侯振国：
@@ -87,3 +87,11 @@ Q ：
 
 Prop = property 参数 
 
+
+## 其他
+
+协议开始都是在 ds.handler.link下面。
+
+NetManager -> messageReceived -> onProcess
+
+所有的协议都在 AlllBeans下面，自动生成。
