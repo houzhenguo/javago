@@ -14,6 +14,7 @@ welcome to houzhenguo java learning
 - [sychronized关键字](./docs/java/multithread/synchronized.md)
 - [线程池](./docs/java/multithread/threadpool.md)
 - [BlockingQueue](./docs/java/multithread/BlockingQueue.md)
+- [ReentrantLock的lock和lockInterruptibly的区别](./docs/java/multithread/ReentrantLock的lock和lockInterruptibly的区别.md)
 
 ## Java8 相关
 
