@@ -67,6 +67,128 @@
 
 这样只需要在原有的基础上多一步由虚拟节点映射到实际节点的步骤即可让少量节点也能满足均匀性。
 
-## 会有什么问题？
+## 代码实现，可以给每台服务器加权，映射到不同 性能级别的服务器上
+[参考链接](https://www.cnblogs.com/parryyang/p/8431100.html)
 
-20191014暂时写到这里。
+```java
+/**
+ *  一致Hash协议的的一个demo
+ */
+public class ConsistencyHashing {
+
+    // 虚拟节点的个数
+    private static final int VIRTUAL_NUM = 5;
+    // 虚拟节点的分配，key是hash值，value是虚拟节点服务器的名称
+    private static SortedMap<Integer, String> shards = new TreeMap<>();
+    // 真实节点列表
+    private static List<String> realNodes = new LinkedList<>();
+    // 模拟初始服务器
+    private static String[] servers = { "192.168.1.1", "192.168.1.2", "192.168.1.3", "192.168.1.5", "192.168.1.6" };
+
+    static {
+        for (String server: servers) {
+            realNodes.add(server);
+            System.out.println("真实节点 ["+server+"] 被添加");
+            for (int i = 0; i< VIRTUAL_NUM; i++) {
+                String virtualNode = server + "&&VN" +i;
+                int hash = getHash(virtualNode);
+                shards.put(hash, virtualNode);
+                System.out.println("虚拟节点[" + virtualNode + "] hash:" + hash + "，被添加");
+            }
+        }
+    }
+
+    public static String getServer(String node) {
+        int hash = getHash(node);
+        Integer key = null;
+        SortedMap<Integer, String> subMap = shards.tailMap(hash);
+        if (subMap.isEmpty()) { // 没有比hash值大的
+            key = shards.lastKey(); // 取出 全局最大的那个
+        } else {
+            key = subMap.firstKey(); // 取出当前map的第一个
+        }
+        String virtualNode = shards.get(key);
+        return virtualNode.substring(0, virtualNode.indexOf("&&"));
+    }
+
+
+    /**
+     * 添加节点
+     *
+     * @param node
+     */
+    public static void addNode(String node) {
+        if (!realNodes.contains(node)) {
+            realNodes.add(node);
+            System.out.println("真实节点[" + node + "] 上线添加");
+            for (int i = 0; i < VIRTUAL_NUM; i++) {
+                String virtualNode = node + "&&VN" + i;
+                int hash = getHash(virtualNode);
+                shards.put(hash, virtualNode);
+                System.out.println("虚拟节点[" + virtualNode + "] hash:" + hash + "，被添加");
+            }
+        }
+    }
+
+    /**
+     * 删除节点
+     *
+     * @param node
+     */
+    public static void delNode(String node) {
+        if (realNodes.contains(node)) {
+            realNodes.remove(node);
+            System.out.println("真实节点[" + node + "] 下线移除");
+            for (int i = 0; i < VIRTUAL_NUM; i++) {
+                String virtualNode = node + "&&VN" + i;
+                int hash = getHash(virtualNode);
+                shards.remove(hash);
+                System.out.println("虚拟节点[" + virtualNode + "] hash:" + hash + "，被移除");
+            }
+        }
+    }
+
+    /**
+     * FNV1_32_HASH算法
+     */
+    private static int getHash(String str) {
+        final int p = 16777619;
+        int hash = (int) 2166136261L;
+        for (int i = 0; i < str.length(); i++)
+            hash = (hash ^ str.charAt(i)) * p;
+        hash += hash << 13;
+        hash ^= hash >> 7;
+        hash += hash << 3;
+        hash ^= hash >> 17;
+        hash += hash << 5;
+        // 如果算出来的值为负数则取其绝对值
+        if (hash < 0)
+            hash = Math.abs(hash);
+        return hash;
+    }
+
+    public static void main(String[] args) {
+
+        //模拟客户端的请求
+        String[] nodes = { "127.0.0.1", "10.9.3.253", "192.168.10.1" };
+
+        for (String node : nodes) {
+            System.out.println("[" + node + "]的hash值为" + getHash(node) + ", 被路由到结点[" + getServer(node) + "]");
+        }
+
+        // 添加一个节点(模拟服务器上线)
+        addNode("192.168.1.7");
+        // 删除一个节点（模拟服务器下线）
+        delNode("192.168.1.2");
+
+        for (String node : nodes) {
+            System.out.println("[" + node + "]的hash值为" + getHash(node) + ", 被路由到结点[" + getServer(node) + "]");
+        }
+    }
+}
+
+
+```
+
+
+
