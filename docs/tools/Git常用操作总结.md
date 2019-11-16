@@ -7,6 +7,12 @@
 
 ![Git概况](./images/git-2.png)
 
+回滚
+```bash
+git reset --hard 02197356d1e9dfa2f150dfc03b36a24354eb9096 #，自行替换后面的id
+输入git push -f -u origin master，将此commit推送到远程master分支
+```
+
 
 ```bash
 git checkout branch01 # → （创建）本地 分支 branch01
