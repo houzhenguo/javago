@@ -13,6 +13,8 @@ ssh-keygen 在 c: user: admin.. : .ssh id_rsa.pub 上传到服务器
 # 在home/user下面创建 .ssh
 mkdir /home/houzhenguo/.ssh
 touch /home/cola/.ssh/authorized_keys
+
+[参考链接](https://www.cnblogs.com/yjcs123/p/10876755.html)
 # 修改hostname
 hostname
 hostnamectl set-hostname aliyun

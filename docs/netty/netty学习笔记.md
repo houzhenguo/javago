@@ -124,3 +124,6 @@ Protobuf-Java:(公用)
 ClientProject
 
 将公用的代码拉取到 ServerProject 中，仅仅是一个仓库，产生了合并，产生了一次提交。
+
+# Thrift
+
