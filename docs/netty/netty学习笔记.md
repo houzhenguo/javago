@@ -90,3 +90,37 @@ message Person {
 required 必须提供
 
 optional 不是必须的。 后面的数字代表顺序。
+
+
+## 使用 Git作为 版本控制系统 
+Q: Client 和 Server 需要同一份生成出来的 Proto Buf 的Java 文件，为了避免手动拷贝，可以使用 git进行控制。
+
+### 解决方案1（不是特别完美）
+
+1. git submodule ： Git 仓库里面的仓库.
+
+ServerProject : 已经在 Git版本之中了。这个工程用到了 Protocol Buf 。
+
+Protobuf-Java: 独立的git的工程。通过 编译器生成的Java代码推送到这个仓库中。protoc
+
+通过 submodule 将 Protobuf-Java 引入到 ServerProject 中。通过git命令.
+
+ClientProject: 与 ServerProject 相似。
+
+这种情况对于 分支情况不友好。
+branch:
+    develop
+    test
+    master
+
+两个仓库，容易出现 分支错乱。
+
+## Git subtree (推荐)
+
+ServerProject
+
+Protobuf-Java:(公用)
+
+ClientProject
+
+将公用的代码拉取到 ServerProject 中，仅仅是一个仓库，产生了合并，产生了一次提交。
