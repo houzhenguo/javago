@@ -95,3 +95,5 @@ Prop = property 参数
 NetManager -> messageReceived -> onProcess
 
 所有的协议都在 AlllBeans下面，自动生成。
+
+lib.util.TimeUtil.curMs(); 使用的时候尽量使用这个，因为底层使用的是 System.currentMis() + 时间; 支持调时间。
