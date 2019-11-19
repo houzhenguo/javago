@@ -77,6 +77,16 @@ Q ：
 4. Procedure 中 lock之前都会 unlock ,这时候不是别人主动释放的锁？ 工会的锁，role的锁？
 -14 182
 
+
+MessageReceived -> process -> 每次处理都是需要new P.submit(); 
+
+加锁的问题？ 我的部分还没有运行结束，锁就被下一个要获得锁的人释放了？
+
+error code的问题。协议中自带 errorcdoe
+小红点并不是统一的 系统。
+
+感觉锁好重啊。 PLeagueBasicListGet.java 40 这锁加的好乱啊。没搞明白。
+
 侯振国：
 1. 熟悉服务器 机器人部分的代码
 2. 体验游戏
@@ -87,13 +97,19 @@ Q ：
 
 Prop = property 参数 
 
+gameserver/gs/cmds
+
 
 ## 其他
 
 协议开始都是在 ds.handler.link下面。
 
-NetManager -> messageReceived -> onProcess
+NetManager -> messageReceived -> onProcess 交给了线程池去处理。
 
 所有的协议都在 AlllBeans下面，自动生成。
 
 lib.util.TimeUtil.curMs(); 使用的时候尽量使用这个，因为底层使用的是 System.currentMis() + 时间; 支持调时间。
+
+关于锁的问题整理：
+1. lock之前释放当前线程持有的锁 // 一定是执行完成了，这个已经明白了。
+2. PLeagueBasicListGet 取的时候重复加锁 -> lock之前 ，unlock 是否就已经保证了，锁只会被lock一次？

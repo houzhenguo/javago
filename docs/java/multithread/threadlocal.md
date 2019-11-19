@@ -2,6 +2,7 @@
 
 # ThreadLocal
 
+[stack-overflow-ThreadLocal Resource Leak and WeakReference](https://stackoverflow.com/questions/940506/threadlocal-resource-leak-and-weakreference)
 ## 一 TreadLocal 概念引入
 
 ### 1.1 线程安全
@@ -106,7 +107,7 @@ static class ThreadLocalMap {
 
 ### 1.5 ThreadLocal 内存泄露问题
 
-`ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候会 key 会被清理掉，而 value 不会被清理掉。这样一来，`ThreadLocalMap` 中就会出现key为null的Entry。假如我们不做任何措施的话，value 永远无法被GC 回收，这个时候就可能会产生内存泄露。ThreadLocalMap实现中已经考虑了这种情况，在调用 `set()`、`get()`、`remove()` 方法的时候，会清理掉 key 为 null 的记录。使用完 `ThreadLocal`方法后 最好手动调用`remove()`方法
+`ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候会 key 会被清理掉，而 value 不会被清理掉。这样一来，`ThreadLocalMap` 中就会出现key为null的Entry。假如我们不做任何措施的话，value 永远无法被GC 回收，这个时候就可能会产生内存泄露。ThreadLocalMap实现中已经考虑了这种情况，在调用 `set()`、`get()`、`remove()` 方法的时候，会清理掉 key 为 null 的记录。使用完 `ThreadLocal`方法后 最好手动调用`remove()`方法 .同时线程 dead的时候，线程所有的数据都会被回收。
 
 ```java
       static class Entry extends WeakReference<ThreadLocal<?>> {
