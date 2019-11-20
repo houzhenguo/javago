@@ -113,3 +113,29 @@ lib.util.TimeUtil.curMs(); 使用的时候尽量使用这个，因为底层使�
 关于锁的问题整理：
 1. lock之前释放当前线程持有的锁 // 一定是执行完成了，这个已经明白了。
 2. PLeagueBasicListGet 取的时候重复加锁 -> lock之前 ，unlock 是否就已经保证了，锁只会被lock一次？
+
+# 自动寻路
+
+map地址： resource\develop\server\map\1030
+
+file: terrain.cfg 地形
+
+MapTemplate
+        —— onLoaded
+                —— MapConfig
+                        1. 确定地图的总宽度 总高度（配置在 terrain.cfg）
+
+
+
+状态机 行为树
+
+
+https://github.com/gaia-ucm/jbt
+
+行为树的工作原理 ： https://indienova.com/indie-game-development/ai-behavior-trees-how-they-work/#iah-0
+
+游戏开发之行为树 ： https://blog.csdn.net/cmqwan/article/details/80453352
+
+基于行为树的AI设计： https://github.com/Rookiexu/ai_tree
+
+腾讯行为树： https://github.com/Tencent/behaviac
