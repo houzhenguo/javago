@@ -109,6 +109,9 @@ static class ThreadLocalMap {
 
 `ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候会 key 会被清理掉，而 value 不会被清理掉。这样一来，`ThreadLocalMap` 中就会出现key为null的Entry。假如我们不做任何措施的话，value 永远无法被GC 回收，这个时候就可能会产生内存泄露。ThreadLocalMap实现中已经考虑了这种情况，在调用 `set()`、`get()`、`remove()` 方法的时候，会清理掉 key 为 null 的记录。使用完 `ThreadLocal`方法后 最好手动调用`remove()`方法 .同时线程 dead的时候，线程所有的数据都会被回收。
 
+有一种危险是，如果线程是线程池的， 在线程执行完代码的时候并没有结束，只是归还给线程池，这个时候ThreadLocalMap 和里面的元素是不会回收掉的
+
+
 ```java
       static class Entry extends WeakReference<ThreadLocal<?>> {
             /** The value associated with this ThreadLocal. */
@@ -120,3 +123,33 @@ static class ThreadLocalMap {
             }
         }
 ```
+
+
+## 源码部分讲解
+
+```java
+    public void set(T value) {
+        Thread t = Thread .currentThread();
+        // 获取线程绑定的ThreadLocalMap
+        ThreadLocalMap map = getMap(t);
+        if (map != null)
+            map.set(this, value);
+        else
+           //第一次设置值的时候进来是这里
+            createMap(t, value);
+    }
+    void createMap(Thread t, T firstValue) {
+        t.threadLocals = new ThreadLocalMap(this, firstValue);
+    }
+
+```
+
+createMap 方法只是在第一次设置值的时候创建一个ThreadLocalMap 赋值给Thread 对象的threadLocals 属性进行绑定，以后就可以直接通过这个属性获取到值了。从这里可以看出，为什么说ThreadLocal 是线程本地变量来的了
+
+- HashMap 是通过链地址法解决hash 冲突的问题
+- ThreadLocalMap 是通过开放地址法来解决hash 冲突的问题
+
+### 开放地址法
+
+这种方法的基本思想是`一旦发生了冲突，就去寻找下一个空的散列地址(这非常重要，源码都是根据这个特性，必须理解这里才能往下走)，只要散列表足够大，空的散列地址总能找到，并将记录存入`。[参考链接](https://juejin.im/post/5d8b2bde51882509372faa7c)
+

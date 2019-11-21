@@ -139,3 +139,7 @@ https://github.com/gaia-ucm/jbt
 基于行为树的AI设计： https://github.com/Rookiexu/ai_tree
 
 腾讯行为树： https://github.com/Tencent/behaviac
+
+https://github.com/homoroselaps/BehaviorTree/blob/master/src/simpleBehaviorTree/nodes/Action.java
+
+gameserver/gs/cmds/debug
