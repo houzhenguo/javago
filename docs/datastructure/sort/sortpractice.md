@@ -102,3 +102,39 @@ public static void merge(T[] a, int lo, int mid, int hi)
     }
 }
 ```
+
+5. 堆排序 待完善
+```java
+    // parent = (i -1)/2
+    public static void main(String[] args) {
+        int[] nums = {1,2,3};
+        heapify(nums, nums.length, 0);
+        printfNums(nums);
+    }
+
+    public static void heapify(int[] nums, int n, int i) {
+        int c1 = 2 * i + 1;
+        int c2 = 2 * i + 2;
+        // c1 and c2
+        int max = i;
+        if (c1 < n && nums[c1] > nums[max]) {
+            max = c1;
+        }
+        if(c2 < n && nums[c2] > nums[max]) {
+            max = c2;
+        }
+        if(max != i) {
+            swap(nums, i, max);
+        }
+    }
+    public static void swap(int[] nums, int from, int to) {
+        int temp = nums[from];
+        nums[from] = nums[to];
+        nums[to] = temp;
+    }
+    public static void printfNums(int[] num) {
+        for (int i=0; i< num.length;i++) {
+            System.out.println(num[i]);
+        }
+    }
+```
