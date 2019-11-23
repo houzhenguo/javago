@@ -127,3 +127,102 @@ ClientProject
 
 # Thrift
 
+[Thrift相关地址](http://thrift.apache.org/) 相比 protobuf,thrift支持更多的语言种类，可能安装会比较复杂。
+
+# NIO
+
+java.io
+java.nio
+
+java.io 中最为核心的概念是流（Stream）,面向流的编程，Java中，一个流要么是输入流，要么是输出流
+java.nio selector,channel,buffer,面向 block 或 channel 的编程。buffer 就是一块内存空间，底层实现就是一块数组，可以实现读写（flip）
+channel -> buffer->已经到达内存
+buffer: limit position mark
+
+除了数组之外，Buffer还提供了数据的结构化访问方式，并且可以追踪到系统的读写过程。
+
+Java 中 7种原生类型都有对应的Buffer类型，IntBuffer,LongBuffer等。无BooleanBuffer
+
+Channel 指的是可以向其写入数据或从中读取数据的对象，所有数据的读写都是通过Buffer进行的。
+与Stream不同的是，Channel是双向的，Channle打开可以进行读取写入或者读写，所以更能反映出底层操作系统的真实情况。在Linux中，底层通道就是双向的。
+
+![nio](./images/nio-1.png)
+
+## Buffer
+position ： 下一个将要被读或者写的索引
+limit :无法去 读写的 第一个索引
+
+capacity:永远不会改变，就是数组的长度，而不是数量的大小allocate
+
+0 <= mark <= position <= limit <= capacity
+
+clear ,flip, rewind(重新读)
+
+isReadOnly 只读buffer
+
+方法链 chain
+
+填充buffer数组前： limit = capcity 的位置，position是下一个可写的位置
+-> flip方法调用
+读取buffer数组前： limit是上次写的下一个位置（position）,position回归到0
+ 
+ IntBuff -> Buffer allocate 调用完之后，数组的基本结构已经完成。
+
+## Channel
+
+1. 从 FileInputStream 获取到 FileChannel 对象
+2. 创建 Buffer
+3. 将数据从 Channel读取到 Buffer中
+
+channel.read(buf)
+
+## 类型化的put and get
+
+putint/putchar
+
+## 切片
+
+slice 从 3-7index截取，修改哪一个buffer都会改到另外一个。share序列
+
+Slince Buffer and origin Buffer share data
+
+## ReadOnlyBuffer
+
+传输给别人 ；put的时候直接抛出异常。
+
+普通 Buffer.asReadOnlyBuffer转换。
+
+## DirectByteBuffer
+  
+ allocateDirect：
+ native method 堆外内存
+ Buffer.address -> 这个成员变量引用到堆外内存分配内存的地址
+
+ 效率：
+
+ heap bytebuff -> 操作系统 开辟一块内存区域，copy heap上的。IO操作的时候多了一次数据copy的过程，与设备进行交互。
+
+ 堆外数据 -> 操作系统直接交互。 zero copy
+
+ 操作系统为什么不直接访问 堆？ 假如发生gC->标记压缩-> 如果native操作可能错位了。copy过程中不会发生GC.由JVM保证。
+
+ `address DirectByteBuffer`被GC掉之后，address引用的堆外内存就会被操作系统回收掉。。。free的过程[链接](https://www.bilibili.com/video/av33707223?p=38)
+
+
+ allocate -> new byte[] 完成初始化 赋值相关操作。
+
+ ## MappedByteBuffer
+
+ 内存映射文件，直接操作内存，由操作系统进行io 读写。
+
+ ## Scattering 与 Gathering
+
+ scattering : 将来自 channel的数据顺序 读到多个 buffer当中。
+
+ 自定义协议 ： header + body ;天然实现 分类
+
+ # Selector
+
+ event SelectKey 注册channel到 selector
+
+P41 https://www.bilibili.com/video/av33707223?p=41
