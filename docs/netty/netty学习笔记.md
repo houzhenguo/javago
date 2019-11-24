@@ -225,4 +225,21 @@ Slince Buffer and origin Buffer share data
 
  event SelectKey 注册channel到 selector
 
-P41 https://www.bilibili.com/video/av33707223?p=41
+## Zero Copy
+
+四次 内核空间与 用户空间的切换
+
+2次多余的 copy
+
+user -> kernel -> call -
+                        |
+user<-kernel<-copy from hardware
+|
+| handle
+-> copy -> kernel -> write data
+![NIO_zerocopy](./images/nio-2.png)
+
+![NIO_zerocopy](./images/nio-3.png)
+
+![NIO_zerocopy](./images/nio-4.png)
+
