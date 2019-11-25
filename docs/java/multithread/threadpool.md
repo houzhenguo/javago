@@ -56,6 +56,38 @@ JDK 内置的拒绝策略如下：
 以上内置拒绝策略均实现了RejectedExecutionHandler 接口，若以上策略仍无法满足实际
 需要，完全可以自己扩展RejectedExecutionHandler 接口。
 
+```java
+//AbortPolicy
+//默认的拒绝策略，直接抛出RejectedExecutionException异常供调用者做后续处理
+public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+    throw new RejectedExecutionException("Task " + r.toString() +
+                                            " rejected from " +
+                                            e.toString());
+}
+
+//DiscardPolicy
+//不做任何处理，将任务直接抛弃掉
+public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+}
+
+//DiscardOldestPolicy
+//抛弃队列中的下一个任务，然后尝试做提交。这个使用我觉得应该是在知道当前要提交的任务比较重要，必须要被执行的场景
+public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+    if (!e.isShutdown()) {
+        e.getQueue().poll();
+        e.execute(r);
+    }
+}
+
+//CallerRunsPolicy
+//直接使用调用者线程执行，相当于同步执行，会阻塞调用者线程，不太友好感觉。
+public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+    if (!e.isShutdown()) {
+        r.run();
+    }
+}
+```
+
 ## Java线程池的工作过程 （重要）
 
 1. 线程池刚创建时，里面没有一个线程。任务队列是作为参数传进来的。不过，就算队列里面
@@ -150,7 +182,30 @@ public static ExecutorService newFixedThreadPool(int nThreads) {
 
 `RejectedExecutionException`异常【因为是运行时异常，不强制catch】，这种处理方式不够优雅。处理拒绝策略有以下几种比较推荐：
 
+---
+
+
+## 如何设置一个合适的线程池大小？
+
+如何设置一个合适的线程池大小，这个问题我觉得是`没有一个固定公式`的。或者可以说，只有一些简单的设置规则，但放到具体业务中，又各有不同，只能根据现场环境测试过后再来分析。
+
+设置合适的线程池大小分为两部分，一部分是最大线程池大小，一部分是最小线程池大小。在ThreadPoolExecutor中体现在最大线程数(maximumPoolSize)和核心线程数(corePoolSize)。
+
+最大线程池大小的设置首先跟当前机器`cpu核心数密切相关`，一般情况来说要想最大化利用cpu，设置为cpu核心数就可以了，比如4核cpu服务器可以设置为4。但实际情况又大有不同，因为往往我们执行的任务都会涉及到IO，比如任务中执行了一个从数据库查询数据的操作，那么这段时间cpu实际上是没有最大化利用的，这样我们就可以适当扩大maximumPoolSize的大小。在有些情况下任务会是cpu密集型的，如果这样设置更多的线程不仅不会提高效率，反而因为线程的创建销毁以及切换开销而大大降低了效率，所以说最大线程池的大小需要根据业务情况具体测试后才能设置一个合适的大小。
+
+最小线程池大小相比较最大线程池大小设置起来相对容易一些，因为最小线程一般来说是可以根据业务情况来预估进行设置，比如大多数情况下会有2个任务在运行，很小概率会有超过2个任务运行，那么直接设置最小线程池大小为2就可以。但有一点需要知道的是每间隔多长时间会有超过2个任务，如果每2分钟会有一次超过2个任务的情况，那么我们可以将线程`过期时间设置的稍微久`一点，比如4分钟，这样就算频繁的超过2个任务，也可以利用缓存的线程池。
+
+总的来说设置最大和最小线程池都是一个没有固定公式的问题，都需要考虑实际业务情况和机器配置，根据实际业务情况多做测试才能做到最优化设置。在一切没有决定之前，可以使用软件架构的KISS原则，设置最大以及最小线程数都为cpu核心数即可，后续在做优化。
+
+## 当使用有界队列时，如何设置一个合适的队列大小？
+
+要设置合适的队列大小，先要明白队列什么时候会被使用。在ThreadPoolExecutor的实现中，使用队列的情况有点特殊。它会先使用核心线程池大小的线程，之后会将任务加入队列中，再之后队列满了之后才会扩大到最大线程池大小的线程。也就是说队列的使用并不是等待线程不够用了才使用，而是等待核心线程不够用了就使用。我不是太能理解这样设计的意图，按《Java性能权威权威指南》一书中的说法是这样提供了两个节流阀，第一个是队列，第二个是最大线程池。但这样做并不能给使用者最优的体验，既然要使用最大线程池，那为什么不在第一次就使用呢？
+
+知道了ThreadPoolExecutor使用线程池的时机，那么再来预估合适的队列大小就很方便了。如果单个任务执行时间在100ms，最小线程数是2，使用者能忍受的最大延时在2s，那么我们可以这样简单推算出队列大小：2/2s/100ms=10，这样满队列时最大延时就在2s之内。当然还有其他一些影响因素，比如部分任务超过或者小于100ms，最大线程池的利用等等，可以在这基础上做简单调整。
+
 
 ## 参考
 [阿里巴巴禁止使用Excutors创建线程池](https://juejin.im/post/5dc41c165188257bad4d9e69)
+
+[有关线程池的十个问题](https://www.cnblogs.com/konck/p/9473681.html)
 
