@@ -53,6 +53,7 @@ welcome to houzhenguo java learning
 - [归并排序原理以及代码实现](./docs/datastructure/sort/归并排序.md)
 - [什么是B树](./docs/datastructure/tree/什么是B树.md)
 - [什么是B+树](./docs/datastructure/tree/什么是B+树.md)
+- [什么是LSM树](./docs/datastructure/tree/什么是LSM树.md)
 
 - [漫画算法](./docs/datastructure/other/漫画算法.md)
 - [一致Hash算法](./docs/datastructure/other/一致hash算法.md)

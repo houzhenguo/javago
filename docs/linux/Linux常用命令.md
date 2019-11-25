@@ -1,8 +1,8 @@
 
 1. du : 本文件夹的磁盘使用情况
 2.  free : 显示内存和交换空间的使用
-3. ps -ef | grep java
-4. top / top -Hp
+3. ps -ef | grep java  / ps aux(少用这个，这个会截断) ps : process status
+4. top / top -Hp 
 5. netstat -nalp t 查看网络端口号的情况。（htop命令）
 ```
  - n: 列出的带ip地址而不是域名
