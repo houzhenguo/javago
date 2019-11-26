@@ -263,3 +263,41 @@ socket buffer 做了改进，使用 fd(file desc)使用了 gather，对应的soc
 
 protocol engine: 从两个地方读取，一个是通过 socketbuff df确认数据位置，从
 kernel buff 读取数据，这是真正意义上 zero copy
+
+==============================================================
+---
+# 源码分析
+基于： netty-all 4.1.15
+
+# MyServer
+
+## EventLoopGroup 
+
+```java
+EventLoopGroup bossGroup = new NioEventLoopGroup(1); // 1 代表线程的数量
+
+// Defalut Thread Count : availableProcessors() * 2
+// Runtime.getRunTime().getAvaibaleProcessors()
+
+// intel 超线程 4核 *2  = 8核心
+// work group
+```
+bossGroup 处理链接
+workGroup 真正完成逻辑处理的
+
+EventLoopGroup ： 事件循环组，底层就是一个死循环，检测输入输出的事件
+
+ChannelFututer<> = register(Channel channel) // 注册 channel 到 eventgroup
+
+NioEventLoopGroup:
+完成变量的赋值，完成了一些准备工作。 一般程序设置线程池 为1 。如果没有提供线程数
+
+就是超线程数 *2
+
+ThreadFactory : 将线程的创建与 线程的执行 解耦
+
+
+
+
+
+

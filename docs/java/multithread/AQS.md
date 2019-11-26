@@ -234,3 +234,46 @@ CountDownLatch 和CyclicBarrier的不同之处？
 给出一些CountDownLatch使用的例子？
 
 CountDownLatch 类中主要的方法？
+
+## CountDownLatch源码阅读
+[参考](https://juejin.im/post/5ae754dd6fb9a07abc29b2ce)
+
+shared -> 可中断的
+CountDownLatch 底层使用的是 Sync-> AQS
+
+CountDownLatch() 构造方法指定的是 AQS 中 state 的数量
+
+tryAcquireShared(){(getState() == 0) ? 1 : -1} 当获取的时候，如果state 为 0 才可以获取。
+
+tryAcquireSharedNanos() // 超时
+
+
+await() -> doAcquireSharedInterruptibly  // for(;;)循环等待，阻塞
+// new Node ,tail 到队列 ,
+
+countDown() //
+## await步骤
+1. 将当前线程包装成一个 Node 对象，加入到 AQS 的队列尾部。
+2. 如果他前面的 node 是 head ，便可以尝试获取锁了。
+3. 如果不是，则阻塞等待，调用的是 LockSupport.park(this);
+
+CountDown 的 await 方法就是通过 AQS 的锁机制让主线程阻塞等待。而锁的实现就是通过构造器中设置的 state 变量来控制的。当 state 是 0 的时候，就可以获取锁。然后执行后面的逻辑。
+
+## ReentrantLock源码阅读
+
+Sync
+
+state : 对于重入锁来说，是 获取的次数。
+ownerExclusiveThread : 所属独占锁的线程是否是当前线程 <->若不是，release会抛出异常。
+
+isLocked() : state > 0 ? true : false;
+
+fair : 底层有两个类的实现
+
+lock(){sync.accquire(1)} -> tryAcquire -> nonfairTryAcquire -> if state ==0 || owner == myThread -> return true
+
+unlock -> release wake up
+
+## Semaphore
+
+permits -> state 同上 

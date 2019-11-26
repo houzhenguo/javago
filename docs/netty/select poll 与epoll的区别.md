@@ -20,3 +20,5 @@ epoll: 由于epoll是根据每个FD上的callable函数来实现的，所以只�
 select:单个进程所能打开的最大连接数，是有 FD_SETSIZE宏定义的，其大小是32个整数大小。
 
 epoll:连接数虽然有上限，但是很大，1G的内存的机器可以打开 10W个左右的链接。
+
+[优秀的文章](https://www.cnblogs.com/anker/p/3265058.html)
