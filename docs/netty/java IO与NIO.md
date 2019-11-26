@@ -197,4 +197,64 @@ Java7中新增了AsynchronousFileChannel作为nio的一部分。AsynchronousFile
 AIO是异步IO的缩写，虽然NIO在网络操作中，提供了非阻塞的方法，但是NIO的IO行为还是同步的。对于NIO来说，我们的业务线程是在IO操作准备好时，得到通知，接着就由这个线程自行进行IO操作，IO操作本身是同步的。
 
 
-**欢迎关注我的微信公众号:"Java面试通关手册"（一个有温度的微信公众号，期待与你共同进步~~~坚持原创，分享美文，分享各种Java学习资源）：**
+# NIO 线程模型
+
+[文章来源](https://www.jianshu.com/p/deee985323ce)
+
+所谓的Reactor模式，核心就是`事件驱动`，或者j叫回调的方式。这种方式就是，应用业务向一个中间人注册一个回调（event handler），当IO就绪后，就这个中间人产生一个事件，并通知此handler进行处理。
+
+那么由谁来充当这个中间人呢？是由一个`不断等待和循环`的单独进程（线程）来做这件事，它接受所有handler的注册，并负责先操作系统查询IO是否就绪，在`就绪后就调用指定handler进行处理`，这个角色的名字就叫做Reactor。
+
+回想一下 Linux网络IO模型 中提到的 IO复用，一个线程可以同时处理多个Connection，是不是正好契合Reactor的思想。所以，在java中可以使用NIO来实现Reactor模型。
+
+## 单线程Reactor
+
+![NIO-6](./images/nio-6.png)
+
+
+- Reactor：负责响应事件，将事件分发给绑定了该事件的Handler处理；
+
+- Handler：事件处理器，绑定了某类事件，负责执行对应事件的Task对事件进行处理；
+
+- Acceptor：Handler的一种，绑定了connect事件。当客户端发起connect请求时，Reactor会将accept事件分发给Acceptor处理。
+
+### 单线程缺点：
+
+1. 一个连接里完整的网络处理过程一般分为accept、read、decode、process(compute)、encode、send这几步，如果在process这个过程中需要处理大量的耗时业务，比如连接DB或者进行耗时的计算等，整个线程都被阻塞，无法处理其他的链路
+
+2. 单线程，不能充分利用多核处理器
+
+3. 单线程处理I/O的效率确实非常高，没有线程切换，只是拼命的读、写、选择事件。但是如果有成千上万个链路，即使不停的处理，一个线程也无法支撑
+
+4. 单线程，一旦线程意外进入死循环或者抛出未捕获的异常，整个系统就挂掉了
+
+对于缺点1，通常的解决办法是将decode、process、encode扔到后台业务线程池中执行，避免阻塞reactor。但对于缺点2、3、4，单线程的reactor是无能为力的。
+
+## 多线程的Reactor
+
+![NIO-6](./images/nio-7.png)
+
+- 有专门一个reactor线程用于监听服务端ServerSocketChannel，接收客户端的TCP连接请求；
+
+- 网络IO的读/写操作等由一个worker reactor线程池负责，由线程池中的NIO线程负责监听SocketChannel事件，进行消息的读取、解码、编码和发送。
+
+- 一个NIO线程可以同时处理N条链路，但是一个链路只注册在一个NIO线程上处理，防止发生并发操作问题。
+
+注意，socketchannel、selector、thread三者的对应关系是：
+
+socketchannel只能注册到一个selector上，但是一个selector可以被多个socketchannel注册；
+
+selector与thread一般为一一对应。
+
+## 主从多线程Reactor
+
+
+![NIO-6](./images/nio-8.png)
+
+在绝大多数场景下，Reactor多线程模型都可以满足性能需求；但是在极个别特殊场景中，一个NIO线程负责监听和处理所有的客户端连接可能会存在性能问题。比如，建立连接时需要进行复杂的验证和授权工作等。
+
+服务端用于接收客户端连接的不再是个1个单独的reactor线程，而是一个boss reactor线程池；
+
+服务端启用多个ServerSocketChannel监听不同端口时，每个ServerSocketChannel的监听工作可以由线程池中的一个NIO线程完成。
+
+
