@@ -294,7 +294,14 @@ NioEventLoopGroup:
 
 就是超线程数 *2
 
-ThreadFactory : 将线程的创建与 线程的执行 解耦
+ThreadFactory : 将线程的创建与 线程的执行 解耦，就是创建线程的，在Java8中是 函数式接口
+
+Runnable command -> 命令模式 线程池的的execute(Runnable command)
+
+ServerBootStrap(server)/ BootStrap(client)
+
+
+
 
 
 
