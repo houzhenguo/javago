@@ -231,6 +231,8 @@ Slince Buffer and origin Buffer share data
 
 2次多余的 copy
 
+Java’s NIO offers this through transferTo (doc).
+
 user -> kernel -> call -
                         |
 user<-kernel<-copy from hardware
@@ -243,3 +245,21 @@ user<-kernel<-copy from hardware
 
 ![NIO_zerocopy](./images/nio-4.png)
 
+## NIO实现 ZeroCOpy的重点
+
+![NIO_zerocopy](./images/nio-5.png)
+
+user context  -> sycall sendfile -> user context
+[链接地址](https://www.bilibili.com/video/av33707223/?p=51&t=1934)
+[medium_nio](https://medium.com/@xunnan.xu/its-all-about-buffers-zero-copy-mmap-and-java-nio-50f2a1bfc05c)
+在这个过程中：
+
+数据依然从磁盘copy到 内核缓冲区中，DMA copy
+
+harddrive -> kernel buffer (重点来了)
+
+socket buffer 做了改进，使用 fd(file desc)使用了 gather，对应的socketbuffer中
+是保留的 df(kernel buffer 的内存地址，以及数据长度)
+
+protocol engine: 从两个地方读取，一个是通过 socketbuff df确认数据位置，从
+kernel buff 读取数据，这是真正意义上 zero copy
