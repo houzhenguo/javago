@@ -15,3 +15,4 @@ demo: A message is just an aggregate containing a set of typed fields;
 9. invent 发明
 10. intensive 加强，集中。
 11. impose  强加
+12.  retrieve 检索 取回

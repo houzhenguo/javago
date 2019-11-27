@@ -298,13 +298,49 @@ ThreadFactory : 将线程的创建与 线程的执行 解耦，就是创建线�
 
 Runnable command -> 命令模式 线程池的的execute(Runnable command)
 
-ServerBootStrap(server)/ BootStrap(client)
+ServerBootStrap(server)/ BootStrap(client) 就是定义，什么都没有做
 
+bootstrap.group(bossGroup, workerGroup) -> acceptor handle serverchannel and channel
 
+bossGroup -> 在 AbstractBootStrap 成员变量 group中
+childGroup -> ServerBootStrap
 
+volatile -> 编译器优化 -> 指令重排序
 
+channel(NioServerSocketChannel.class) -> 将传入进来的class 赋值给了
 
+ReflectiveChannelFactory 的成员变量，将通过反射的方式创建对象。
 
+当调用 bind() 创建 channel实例
+
+ChannelFactory -> 设置为 AbstractBootStrap 的成员变量
+
+NioServerSocketChannel： selector accept new connection
+
+childHandler -> workgroup使用 -> 赋值给 Server
+
+赋值部分总结：
+    boss -> abstractbootstrap
+    work -> serverbootstrap
+    channelbootstrap -> abstractbootstrap
+
+serverbootstrap.bind(8899) -> create a new channel and bind it
+
+AbstractBootStrap -> doBind()
+
+但凡出现 future 就是异步的
+
+Future: get-> 阻塞 cancle(中断) isDone 
+
+netty.Future -> addListener 观察者模式 -> Future完成 -> 回调 listener
+
+亮点： netty 解决了 future.get什么时候调用（因为调用会阻塞）添加listener
+isSuccess 而不是 isDone
+
+ChannelFuture -> 一个异步的channel io 操作；netty中所有的IO操作都是异步的，你在调用
+完方法之后会立即返回，会return ChannelFuture实例
+
+不要使用 ChannelFuture中的await方法
 
 
 
