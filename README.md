@@ -75,6 +75,7 @@ welcome to houzhenguo java learning
 
 - [Linux_Shell文本处理](./docs/linux/Linux_Shell文本处理.md)
 - [日志分析命令awk基础用法](./docs/linux/日志分析命令awk基础用法.md)
+- [Linux_IO模型](./docs/linux/IO模型.md)
 
 ## 网络部分
 
