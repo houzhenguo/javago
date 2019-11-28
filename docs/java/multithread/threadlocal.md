@@ -153,3 +153,9 @@ createMap 方法只是在第一次设置值的时候创建一个ThreadLocalMap �
 
 这种方法的基本思想是`一旦发生了冲突，就去寻找下一个空的散列地址(这非常重要，源码都是根据这个特性，必须理解这里才能往下走)，只要散列表足够大，空的散列地址总能找到，并将记录存入`。[参考链接](https://juejin.im/post/5d8b2bde51882509372faa7c)
 
+
+## ThreadLocal key weakReference问题 key如果是强引用
+
+假设 Entry 的 key 没有使用弱引用的方式，而是使用了强引用：由于 ThreadLocalMap 的生命周期和当前线程一样长，那么当`引用`(使用) ThreadLocal 的对象被回收后，由于 ThreadLocalMap 还持有 ThreadLocal 和对应 value 的强引用，ThreadLocal 和对应的 value 是不会被回收的，这就导致了内存泄漏。所以 Entry 以弱引用的方式避免了 ThreadLocal 没有被回收而导致的内存泄漏，但是此时 value 仍然是无法回收的，依然会导致内存泄漏。
+[参考链接](https://juejin.im/post/5965ef1ff265da6c40737292)
+
