@@ -138,3 +138,85 @@ class Solution {
 }
 ```
 
+## 4. 斐波那契数列(Easy)
+
+大家都知道斐波那契数列，现在要求输入一个整数n，请你输出斐波那契数列的第n项（从0开始，第0项为0）。
+n<=39 ; 1、1、2、3、5、8、13、21、34
+
+分析：
+
+F(n) = F(n-1) + F(n-2); if n==1 || 2  ->  1
+
+```java
+    // method1: 递归实现
+    public static int fib(int n) {
+        if (n == 1 || n == 2) {
+            return 1;
+        }
+        return fib(n-1) + fib(n-2);
+    }
+    // method2: DP
+    public static int fibDp(int n) {
+        int[] dp = new int[n]; // DP的核心思想就是这个数组缓存结果
+        if (n == 1 || n == 2) {
+            return 1;
+        }
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i=2;i<n;i++) {
+            dp[i] = dp[i-1] + dp[i-2];
+        }
+        return dp[n-1];
+    }
+```
+## 5. 跳台阶(Easy)
+
+一只青蛙一次可以跳上 1 级台阶，也可以跳上 2 级。求该青蛙跳上一个 n 级的台阶总共有多少种跳法。
+
+分析：
+
+假如一共有 10 阶，到达第 10阶的方式有两个， a. 从第9阶上去 b. 从第8阶上去,而选择哪一种，又取决与到达 第9 阶和到达第8 阶的方式
+F(10) = F(9) + F(8)
+F(9) = F(8) + F(7); // 这里面就开始存在重复计算的问题了
+
+```java
+    // DP 上楼梯
+    public static int stairs(int n) {
+        if (n == 1 || n == 2) {
+            return n;
+        }
+        int pre1 = 1; // 代表前 1 阶
+        int pre2 = 2; // 代表前 2 阶
+        int pre = 0;  // 当前
+        for (int i=3;i<=n;i++) {
+            pre = pre1 + pre2; // 当前的等于前两种的和
+            pre2 = pre1; // 先将 pre1 -> pre2 避免数据丢失
+            pre1 = pre; // 将 pre -> pre1
+        }
+        return pre;
+    }
+```
+
+## 6. 变态跳台阶(mid)
+一只青蛙一次可以跳上 1 级台阶，也可以跳上 2 级... 它也可以跳上 n 级。求该青蛙跳上一个 n 级的台阶总共有多少种跳法。
+
+分析 ： 
+
+假如有 10 阶，则第10 阶的方式有 从第1 (fill with 1)跳上去 ，从 2. ...9 阶跳上去
+F(10) = F(9) + F(8) + ... + F(1);
+```java
+    // 复杂版跳台阶，不限制一次跳几个
+    public static int stairs(int n) {
+        int[] dp = new int[n]; // 创建 dp数组
+        Arrays.fill(dp,1); // 全部填充1，可以直接跳上去，不管前面的，所以默认填充1(重要)
+        for (int i= 0; i<n; i++) {
+            for (int j=0;j<i;j++) { // 处理一下前面的
+                dp[i] += dp[j]; // 把前面所有的次数累加起来就是当前的（注意dp[i]已经有一个值为1）
+            }
+        }
+        return dp[n-1];// 返回
+    }
+```
+
+
+
