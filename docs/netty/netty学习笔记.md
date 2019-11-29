@@ -342,5 +342,15 @@ ChannelFuture -> 一个异步的channel io 操作；netty中所有的IO操作都
 
 不要使用 ChannelFuture中的await方法
 
+bootstrap.bind
+ServerBootStrap init -> 将生成channnelInitializer -> init
+
+Reactor 模式 -> 反应器模式
+netty整体架构是 Reactor模式的完整体现。
+
+`Scalable IO In Java` http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf
+
+`Reactor Douglas C.Schmidt`
+
 
 
