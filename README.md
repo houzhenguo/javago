@@ -33,6 +33,7 @@ welcome to houzhenguo java learning
 ## 数据库相关
 
 - [Mysql索引原理与优化](./docs/db/mysql/mysql索引和sql调优.md)
+- [select加锁分析](./docs/db/mysql/select加锁分析.md)
 
 ## MQ相关
 
