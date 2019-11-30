@@ -352,5 +352,7 @@ netty整体架构是 Reactor模式的完整体现。
 
 `Reactor Douglas C.Schmidt`
 
+## Selection
 
+![nio-9](./images/nio-9.png)
 
