@@ -90,6 +90,7 @@ welcome to houzhenguo java learning
 ## 分布式相关
 
 - [美团分布式id_Leaf](./docs/distributed/美团点评分布式ID_Leaf.md)
+- [秒杀系统的设计](./docs/distributed/秒杀系统的设计.md)
 
 ## Tools
 

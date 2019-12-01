@@ -355,4 +355,7 @@ netty整体架构是 Reactor模式的完整体现。
 ## Selection
 
 ![nio-9](./images/nio-9.png)
+## Reactor
+
+![netty-11](./images/netty-11.png)
 
