@@ -71,3 +71,24 @@ DT=`date +"%Y%m%d_%H%M%S"`
 export HISTFILE="/tmp/history/${LOGNAME}/${USER_IP} history.$DT"
 chmod 600 /tmp/history/${LOGNAME}/*history* 2>/dev/null
 ```
+
+```sql
+  243  cd /home/houzhenguo/
+  244  mysql
+  245  su root
+  246  su houzhenguo
+  247  service mysqld start 
+  248  service mysqld start
+  249  mysql
+  250  whoami
+  251  vim /etc/my.cnf
+  252  /etc/init.d/mysql restart
+  253  /etc/init.d/mysqld restart
+  254  service mysql start
+  255  mysql
+  256  service mysqld start
+  257  mysql
+  258  mysql -u root -p
+  259  history;
+-- 备份一下
+```
