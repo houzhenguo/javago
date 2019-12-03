@@ -92,3 +92,19 @@ chmod 600 /tmp/history/${LOGNAME}/*history* 2>/dev/null
   259  history;
 -- 备份一下
 ```
+
+## redis
+
+```bash
+cd src
+./redis-server # 启动redis 的服务  ./src/redis-server redis.conf 带配置文件的启动方式
+# 启动redis 的客户端
+./redis-cli ## src下面
+# 修改 redis.conf 下面 daemonize yes 可以后台启动
+
+ps -ef|grep redis # 查看redis 进程，默认开启 6379端口
+
+./redis-cli shutdown # shutdown redis
+
+# redis.conf 中可以配置 save的策略
+```
