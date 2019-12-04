@@ -108,3 +108,9 @@ ps -ef|grep redis # 查看redis 进程，默认开启 6379端口
 
 # redis.conf 中可以配置 save的策略
 ```
+
+## python3 的安装教程
+
+https://blog.csdn.net/lovefengruoqing/article/details/79284573
+
+因为centos默认python2 ,并且 yum 依赖 python2
