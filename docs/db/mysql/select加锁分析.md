@@ -343,6 +343,7 @@ RR级别需要多考虑的就是<font color ='red'>gap lock，他的加锁特征
 
 
 [参考链接](https://juejin.im/post/5d5671a2e51d45620821cea7) 原作者： 孤独烟
+[MySql死锁](https://www.cnblogs.com/zejin2008/p/5262751.html)
 
 
 
