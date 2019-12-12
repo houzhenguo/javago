@@ -387,3 +387,8 @@ netty在事件处理器上进行了升级，开发了大量的回调方法，使
 5. Initiation Dispatcher(初始分发器)：实际上就是 Reactor角色
 它本身定义了一些规范，这些规范用于控制事件的调度方式，
 同时又提供了应用进行事件的处理器的 注册，删除等设置。
+
+# Codec
+
+ByteBuf.readableBytes()
+in.getIndex(in.readerIndex())
