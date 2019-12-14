@@ -203,6 +203,19 @@ public static ExecutorService newFixedThreadPool(int nThreads) {
 
 知道了ThreadPoolExecutor使用线程池的时机，那么再来预估合适的队列大小就很方便了。如果单个任务执行时间在100ms，最小线程数是2，使用者能忍受的最大延时在2s，那么我们可以这样简单推算出队列大小：2/2s/100ms=10，这样满队列时最大延时就在2s之内。当然还有其他一些影响因素，比如部分任务超过或者小于100ms，最大线程池的利用等等，可以在这基础上做简单调整。
 
+## Executor 的中断操作
+调用 Executor 的 shutdown() 方法会等待线程都执行完毕之后再关闭，但是如果调用的是 shutdownNow() 方法，
+则相当于调用每个线程的 interrupt() 方法。但是只有哪些受interrupt 影响的线程才会中断，不保证其他线程中断，并且remove掉队列中的东西。
+
+如果只想中断 Executor 中的一个线程，可以通过使用 submit() 方法来提交一个线程，它会返回一个 Future<?> 对
+象，通过调用该对象的 cancel(true) 方法就可以中断线程。
+
+```java
+Future<?> future = executorService.submit(() -> {
+// ..
+});
+future.cancel(true);
+```
 
 ## 参考
 [阿里巴巴禁止使用Excutors创建线程池](https://juejin.im/post/5dc41c165188257bad4d9e69)

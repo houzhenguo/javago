@@ -1,7 +1,7 @@
 # Synchronized 关键字
 
 ![jdk1.6之后版本synchronized关键字的优化](../images/sync_base.png)
-
+![sync_升级.png](../images/sync_升级.png)
 ### sychronized 使用方式总结 
 1. 修饰实例方法，作用于实例，进入同步代码前获取对象实例的锁，通过标志位的方式进入退出
 
@@ -142,3 +142,5 @@ synchronized 依赖于 JVM 实现的。JDK1.6为sychronized关键字进行了许
 在JDK1.6之前，synchronized 的性能是比 ReenTrantLock 差很多。具体表示为：synchronized 关键字吞吐量随线程数的增加，下降得非常严重。而ReenTrantLock 基本保持一个比较稳定的水平。我觉得这也侧面反映了， synchronized 关键字还有非常大的优化余地。后续的技术发展也证明了这一点，我们上面也讲了在 JDK1.6 之后 JVM 团队对 synchronized 关键字做了很多优化。**JDK1.6 之后，synchronized 和 ReenTrantLock 的性能基本是持平了。所以网上那些说因为性能才选择 ReenTrantLock 的文章都是错的！JDK1.6之后，性能已经不是选择synchronized和ReenTrantLock的影响因素了！而且虚拟机在未来的性能改进中会更偏向于原生的synchronized，所以还是提倡在synchronized能满足你的需求的情况下，优先考虑使用synchronized关键字来进行同步！优化后的synchronized和ReenTrantLock一样，在很多地方都是用到了CAS操作**。
 
 copyright houzhenguo 20190826
+
+参考 ：https://blog.csdn.net/baidu_38083619/article/details/82527461
