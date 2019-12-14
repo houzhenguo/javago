@@ -25,5 +25,7 @@ N: pre
 nohup command > myout.file 2>&1 &   
 ```
 
+11. md5sum 校验文件是否变化 可以在上传的时候校验是否有残缺
+
 ## 参考 
 [UNIX / LINUX CHEAT SHEET](http://cheatsheetworld.com/programming/unix-linux-cheat-sheet/)
