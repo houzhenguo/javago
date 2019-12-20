@@ -26,6 +26,8 @@
     - [参考](#参考)
 
 <!-- /TOC -->
+
+[优秀文章](https://mp.weixin.qq.com/s?__biz=MzAxNjk4ODE4OQ==&mid=2247484443&idx=1&sn=d612f873415f08281ebdc20323a4e9b1&chksm=9bed2569ac9aac7fdab1b98f5f5d4bfb2dc61e378e3b864723f20c8f8bb47fb5f5a5b6d041d9&scene=21#wechat_redirect)
 # Java 内存区域详解
 ## 一 概述
 
