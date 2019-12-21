@@ -107,9 +107,100 @@ zookeeper 与 redis
 [address](https://www.bilibili.com/video/av49561181?t=415&p=62)
 
 
+# 底层数据结构
+
+## String
+
+SDS: `simple dynamic string`
+```c
+struct sds
+{
+    int free; // 用来保存剩余的长度
+    int len; // 用来保存已经使用的长度
+    char[];
+}
+```
+
+相比 C 语言原生的优点：
+
+
+1. 保留了 length 不用遍历 
+2. 避免了 缓存溢出，自动扩容
+3. 空间预分配，惰性释放
+4. 二进制一些特殊编码的问题
+
+### 字符串对象
+
+set 222;
+
+encoding 格式 以及 ptr 属性值。
+
+str -> encoding : raw . -> sds
+
+long double 也是作为 字符串保存的。
 
 
 
+
+## 链表
+
+c语言中没有链表。
+
+```c
+typedef struct listNode 
+{
+    struct listNode *pre;
+    struct listNode *next;
+    void   * value;
+}listNode
+```
+双向链表，带 length,与其他语言中的链表并无区别。
+
+tail ,head. 
+
+列表，订阅查询，客户端信息都是使用这个数据结构。
+
+## 字典
+
+hash的底层实现。
+
+```c
+typedef struct dictht {
+    // 哈希表数组
+    dictEntry **table;
+    // 哈希表大小
+    unsigned long size;
+    // 哈希表大小掩码，用于计算索引值，= size -1
+    unsigned long sizemask;
+    // 该哈希表已经有节点的数量
+    unsigned long used;
+}dictht;
+```
+
+index = hash & (length -1)
+
+字典的扩容，加载因子，寻址，冲突解决办法与 hashmap 类似
+
+## 跳跃表
+
+zset,集群节点。
+
+平均 O(logN) 时间复杂度可以与 平衡树 媲美。牺牲空间换时间。
+
+具体可以参考 跳跃表的文章。
+
+跳跃表是分层的，随机分层。所谓的层，其实就是维护了一个数组。
+
+### skiplist and avl
+
+1. skiplist 简单
+2. 不涉及树的变动
+3. 查找起来简单，范围查找。next节点不是太死板固定。
+
+
+## 集合
+
+set 底层使用的是数组，这一块还挺麻烦的，没有仔细看。具体的可以参考 Redis设计与实现这本书。
 
 
 
