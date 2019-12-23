@@ -100,6 +100,8 @@ springboot 学习。
 
 大概看一下 mybatis 快速学习一下，充实简历。
 
+Reactor 三种模型其实都应该关注一下，在不同的netty 以及 redis中可能使用不同的。
+
 
 
 ## 备注记录
