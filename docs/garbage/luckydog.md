@@ -114,3 +114,5 @@ Reactor 三种模型其实都应该关注一下，在不同的netty 以及 redis
 5. sentinel 阿里开源流控框架 如果有时间可以了解一下这个。
 
 地址：https://juejin.im/post/5d6f0987f265da03cf7aab4f#heading-0
+
+自定义注解 -> 解释器 注册
