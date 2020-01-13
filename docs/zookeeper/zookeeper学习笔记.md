@@ -63,3 +63,9 @@ ZK 的数据结构与 Unix 文件相似，每个节点 称作 ZNode,每个 ZNode
 ## 安装
 
 [地址](https://apache.org/dist/zookeeper/zookeeper-3.4.14/)
+
+
+## ZK的负载均衡
+
+在 ZK下创建一个持久化的节点，每台生产者 在该节点下创建 临时节点。
+客户端获取节点的 列表可以自己实现 负载均衡。
