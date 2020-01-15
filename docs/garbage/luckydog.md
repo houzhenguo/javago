@@ -124,3 +124,15 @@ Reactor 三种模型其实都应该关注一下，在不同的netty 以及 redis
 
 1. 无用的去掉，显得跟没东西写了似的
 2. 想办法写 编解码的部分
+
+二叉树 路径算法 https://leetcode-cn.com/problems/path-sum-iii/description/ 
+
+二叉树 左节点 https://leetcode-cn.com/problems/sum-of-left-leaves/ 我没有理解题意
+
+
+queue linkedList add poll
+stack push pop
+
+二叉树的 中序遍历 非递归实现 要经常复习 无他，熟能生巧尔
+
+二叉树 BST 比它 大的加起来
