@@ -136,6 +136,26 @@ class Solution {
         return dp[dp.length -1];
     }
 }
+
+
+    // 20200106 版本 没有 2 1 1 2的问题
+    public static int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 0) {
+            return 0;
+        }
+        if (n == 1) {
+            return nums[0];
+        }
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        dp[1] = Math.max(nums[0],nums[1]);
+        for (int i = 2; i< n;i++) {
+            // 偷 与 不偷的问题
+            dp[i] = Math.max(dp[i-2] +nums[i], dp[i-1]);
+        }
+        return dp[n-1];
+    }
 ```
 
 ## 4. 斐波那契数列(Easy)
@@ -219,4 +239,28 @@ F(10) = F(9) + F(8) + ... + F(1);
 ```
 
 
+## 7. 最大子序和
 
+给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+
+输入: [-2,1,-3,4,-1,2,1,-5,4],
+输出: 6
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
+
+```java
+// DP 解法
+ public int maxSubArray(int[] nums) {
+        int ans = nums[0];
+        int sum = 0;
+        for(int num: nums) {
+            if(sum > 0) { // 前面累加的增长 > 0 那就加上我自己再看看
+                sum += num;
+            } else {  // 前面累加的增长 < 0  前面的所有累加的增长都白干了，那就从这一次开始看后面的吧
+                sum = num;
+            }
+            ans = Math.max(ans, sum);
+        }
+        return ans;  // sum就等于从前面某一天到今天的增长
+    }
+}
+```
