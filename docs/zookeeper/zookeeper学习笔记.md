@@ -1,6 +1,8 @@
 
 # ZooKeeper
 
+https://www.bilibili.com/video/av32093417?from=search&seid=17495779046723308974
+
 ## 概述
 
 Zookeeper 是一个开源 `分布式`的，为分布式应用提供协调服务的Apache项目。
