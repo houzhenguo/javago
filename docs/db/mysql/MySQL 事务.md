@@ -81,7 +81,7 @@ transaction-isolation = REPEATABLE-READ
 
 ## InnoDB 默认的事务隔离级别是什么？如何修改？
 
-InnoDB 默认的事务隔离是 repetable read（可重复读）；可以通过 set 作用域 transaction isolation level 事务隔离级别 来修改事务的隔离级别，比如：
+InnoDB 默认的事务隔离是 repeatable read（可重复读）；可以通过 set 作用域 transaction isolation level 事务隔离级别 来修改事务的隔离级别，比如：
 
 > MySQL> set global transaction isolation level read committed; // 设置全局事务隔离级别为 read committed
 MySQL> set session transaction isolation level read committed; // 设置当前会话事务隔离级别为 read committed

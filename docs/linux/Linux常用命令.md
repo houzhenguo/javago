@@ -31,5 +31,7 @@ nohup command > myout.file 2>&1 &
 
 13. ll tomcat ttt >out 2>&1 sd输出到 out 2错误输出到标准1 
 
+14. dd 删除当前行
+
 ## 参考 
 [UNIX / LINUX CHEAT SHEET](http://cheatsheetworld.com/programming/unix-linux-cheat-sheet/)
