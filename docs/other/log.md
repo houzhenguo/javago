@@ -1,0 +1,7 @@
+```xml
+<dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.6</version>
+    </dependency>
+```

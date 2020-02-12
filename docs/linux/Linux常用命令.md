@@ -33,5 +33,7 @@ nohup command > myout.file 2>&1 &
 
 14. dd 删除当前行
 
+15. tail -500f xxx.log 实时查看最后 500行
+
 ## 参考 
 [UNIX / LINUX CHEAT SHEET](http://cheatsheetworld.com/programming/unix-linux-cheat-sheet/)
