@@ -99,3 +99,102 @@ Kafka模型的优点是每个主题都有这两种属性——它可以扩展处
 ## Kafka as a Storage System
 
 -- 暂停。 http://kafka.apache.org/intro
+
+---
+
+# Kafka
+
+## 发布订阅模式
+
+### 优缺点
+
+基于 拉取 发布订阅模式。这样可以让 consumer 进行控制数据的获取的速度。但是 消费者
+
+需要轮询的去 消息队列 去查询 是否有新消息。如果长时间没有消息，就会比较浪费资源，因为
+
+内部维护着一个长轮询。
+
+
+
+## Leader and Follower 
+
+这两个概念是基于 分区而言的，而不是 Broker.不论是 生产者 还是消费者，都是去找相关的 
+leader .follower 只是做备份使用的。
+
+同一个组里面的不同消费者 不能去 消费 同一个分区的数据。并发度最好的情况是 ，消费者组中的
+
+消费者数量 与 主题的 分区数量一致，多了无益，还浪费资源。
+
+在消费者里面保存消费的位置信息，我消费到哪条消息了。这个信息可以保存在 zk里面。不同版本
+之间有区别。0.9之前在 zk存储 的是 offset.0.9之后存储在kafka 中，在某个主题里面。这个存在 磁盘。默认存储
+7天。
+
+![集群模式架构](./images/kafka-4.png) 
+
+# Quickstart
+
+链接地址： http://kafka.apache.org/quickstart
+
+Kafka 中消息是以 topic 进行分类的，生产者生产消息，消费者消费消息，都是面向 topic
+的。
+topic 是逻辑上的概念，而 partition 是物理上的概念，每个 partition 对应于一个 log 文
+件，该 log 文件中存储的就是 producer 生产的数据。Producer 生产的数据会被不断追加到该
+log 文件末端，且每条数据都有自己的 offset。消费者组中的每个消费者，都会实时记录自己
+消费到了哪个 offset，以便出错恢复时，从上次的位置继续消费
+
+![存储机制](./images/kafka-5.png) 
+
+由于生产者生产的消息会不断追加到 log 文件末尾，为防止 log 文件过大导致数据定位
+效率低下，Kafka 采取了`分片`和`索引`机制，将每个 partition 分为多个 segment。每个 segment
+对应两个文件——“.index”文件和“.log”文件。这些文件位于一个文件夹下，该文件夹的命名
+规则为：topic 名称+分区序号。例如，first 这个 topic 有三个分区，则其对应的文件夹为 first-
+0,first-1,first-2。 1G一个片，可配置。
+
+```
+00000000000000000000.index
+00000000000000000000.log
+00000000000000170410.index // 这个数字是当前分片最小的偏移量。
+00000000000000170410.log
+00000000000000239430.index
+00000000000000239430.log
+```
+
+![索引机制](./images/kafka-6.png) 
+
+根据消息的偏移量 可以 通过二分法快速 查找到  相应的index文件，根据 文件中的  消息偏移量
+
+列表可以 在 log data 中快速找到 数据开始的位置 + 数据长度的大小。
+
+## Kafka 分区策略
+1. 方便集群的扩展
+2. 方便 消费者的并发度
+
+![API](./images/kafka-7.png) 
+
+（1）指明 partition 的情况下，直接将指明的值直接作为 partiton 值；
+（2）没有指明 partition 值但有 key 的情况下，将 key 的 hash 值与 topic 的 partition 
+数进行取余得到 partition 值；
+（3）既没有 partition 值又没有 key 值的情况下，第一次调用时随机生成一个整数（后
+面每次调用在这个整数上自增），将这个值与 topic 可用的 partition 总数取余得到 partition 
+值，也就是常说的 round-robin 算法
+
+## Kafka 是如何保证数据不丢失的
+
+为保证 producer 发送的数据，能可靠的发送到指定的 topic，topic 的每个 partition 收到
+producer 发送的数据后，都需要向 producer 发送 ack（acknowledgement 确认收到），如果
+producer 收到 ack，就会进行下一轮的发送，否则重新发送数据。
+
+![保证可用性](./images/kafka-8.png) 
+
+Kafka的同步方案：
+
+全部完成同步，才发送ack。
+
+后，设想以下情景：leader 收到数据，所有 follower 都开始同步数据，
+但有一个 follower，因为某种故障，迟迟不能与 leader 进行同步，那 leader 就要一直等下去，
+直到它完成同步，才能发送 ack。这个问题怎么解决呢？
+Leader 维护了一个动态的 in-sync replica set (ISR)，意为和 leader 保持同步的 follower 集
+合。当 ISR 中的 follower 完成数据的同步之后，leader 就会给 follower 发送 ack。如果 follower
+长时间 未 向 leader 同 步 数 据 ， 则 该 follower 将 被 踢 出 ISR ， 该 时 间 阈 值 由
+
+replica.lag.time.max.ms 参数设定。Leader 发生故障之后，就会从 ISR 中选举新的 leader。
