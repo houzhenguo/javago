@@ -3,6 +3,10 @@
 
 官网地址： http://hadoop.apache.org/
 
+B站地址 https://www.bilibili.com/video/av15390641
+
+这个课程比较清晰： https://www.bilibili.com/video/av90340486?p=10 这个视频比较优秀。
+
 ## 简介
 
 大数据主要解决，海量数据的`存储` 和 海量数据的`分析计算`问题，是一个分布式基础架构，后期学习的框架都是依赖 hadoop。它通常指的是一个 广泛的生态圈，例如 Hbase,Hive,Zk,...
@@ -36,15 +40,74 @@
 
 ## 组成
 - common(辅助工具)
-- HDFS(数据存储)
+- HDFS(数据存储) Hadoop Distribute FileSystem
 - Yarn(资源调度)
 - MapReduce(计算))
 
+2.x版本，将资源调度，抽离为 YARN,分层街头，可维护性强！YARN 不仅可以为 hadoop 服务，还可以为其他的计算框架，例如 spark,flink服务，增强可用性。
+
 ## HDFS 架构概述
 
-1. NameNode(nn) ； 存储 文件的元数据，如文件名，文件的目录结构，文件属性（生成时间，副本数，文件权限），以及每个文件的块列表和块所在的DataNode等。（相当于目录）
+1. NameNode(nn必须) ： 存储 文件的元数据，如文件名，文件的目录结构，文件属性（生成时间，副本数，文件权限），以及每个文件的块列表和块所在的DataNode等。（相当于目录）,只有一个。
 
-2. DataNode(dn): 在本地文件系统存储文件块数据，以及块数据的校验和。
+2. DataNode(dn必须): 在本地文件系统存储文件块数据，以及块数据的校验和,真正存储数据的节点，以块为单位，将一个文件切分称为多个块，分别存储在 DataNode，可以有多个。
 
 3. Secondary NameNode(2nn):用来监控 HDFS状态的辅助后台程序，每隔一段时间获取 HDFS元数据的快照。
+
+
+## YARN
+
+    负责集群中所有机器（节点）计算资源的调度和统一管理！
+
+    核心进程：  ResourceManager(RM)资源管理器 必须的,整个集群的管理，负责接收客户端的请求，定时监控 NM的启动和运行，向NM分配任务
+
+        1 个
+
+    NodeManager:必须，某个节点的管理，单个节点所有算例的管理，定期定时向 RM汇报，接受RM分配的任务。
+
+        N 个
+    ApplicationMaster (一个任务启动时才会出现)：一个job提交时候，启动 ApplicationMaster进程负责与 ResourceManager 以及 
+    
+        N 个
+    NodeManager 通信，进行申请资源。
+        N 个
+
+    Countioner: 容器，一个task在运行时需要占用一定的算力，（CPU，内存等），为了防止当前 task的计算资源在使用时候被其他task抢占，NM会在当前 task使用的计算 封装成为一个容器。
+
+        作用： 隔离计算资源，防止被多个 task抢占。
+
+## MapReduce
+    是一个编程模型。规定了编程中应该编写哪些组件，以及组件的组成和执行顺序等
+    Map阶段： 将大数据拆分，分别交给多个节点，并行计算，提高计算效率。
+        核心进程：MapTask
+    Reduce阶段： 将map阶段运算的结果，进行汇总合并，产生总的结果。
+        核心进程：ReduceTask
+
+    一个MapReduce程序由多个 MapTask 和 多个 ReduceTask组成，这个 程序称为 job。
+
+
+![](../images/hd-1.png)
+
+
+## 大数据生态体系
+
+![](../images/hd-2.png)
+
+## Hadoop 目录组成
+
+    bin: 常用命令
+    sbin: 管理集群常用的命令（启动，关闭等）
+    etc: 配置文件所在的目录
+
+    libexec(不要动)：和本地底层环境相关的配置文件
+    lib(不要动)： 动态库文件
+    share: 提供jar包
+
+## 安装
+    1. 解压
+```bash
+./hadoop version
+```
+注意 HADOOP_HOME 环境变量的配置，防止今后安装 hadoop生态圈的框架出现问题。
+
 
