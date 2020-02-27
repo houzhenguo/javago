@@ -133,7 +133,148 @@ leader .follower 只是做备份使用的。
 
 # Quickstart
 
-链接地址： http://kafka.apache.org/quickstart
+链接地址： http://kafka.apache.org/quickstart 这里可配置快速启动。
+
+需要启动一个 zk集群 ，因为在 kafka/config/server.properties 中有配置的默认的 zk的端口，索引暂时不需要修改zk的相关信息，只是需要直接启动就好。
+
+## 部署流程
+1. 解压 压缩包
+```bash
+tar -xzf kafka_2.12-2.4.0.tgz
+cd kafka_2.12-2.4.0
+```
+2. 启动zk服务器
+```bash
+bin/zookeeper-server-start.sh config/zookeeper.properties
+```
+3. 启动Kafka服务器
+```bash
+bin/kafka-server-start.sh config/server.properties
+```
+4. 创建 topic
+```bash
+# 如果 topic 存在，则创建失败
+# 指定一个分区 一个备份
+bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic test
+```
+5. 查看 topic list
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+__consumer_offsets
+houzhenguotopic
+my-replicated-topic
+test
+```
+6. 生产者发送消息
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+>我在测试往topiczhu发送消息
+>这是第二条消息
+```
+7. 消费者阻塞的消费消息
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
+this is a me
+;
+我在测试往topic发送消息
+这是第二.消息
+```
+因为消费者是 pull 拉的形式 去获取 生产者的数据。
+
+## broker集群相关
+集群问题是启动多个 broker 实例，通过 后缀指定不同的 config  文件。
+同时，修改 broker.id 全局不重复，唯一。
+
+1. copy config文件
+```bash
+cp config/server.properties config/server-1.properties
+cp config/server.properties config/server-2.properties
+``` 
+2. 修改 server.properties
+ 
+ 同时，指定不同的 data 的存储路径。
+
+```properties
+config/server-1.properties:
+    broker.id=1                 # broker.id 全局唯一 
+    listeners=PLAINTEXT://:9093 # 修改端口号，避免冲突
+    log.dirs=/tmp/kafka-logs-1  # 指定数据存储路径，这里的log其实是真实数据的存储
+ 
+config/server-2.properties:
+    broker.id=2
+    listeners=PLAINTEXT://:9094
+    log.dirs=/tmp/kafka-logs-2
+```
+3. 启动集群的另外两个实例
+```
+[houzhenguo@aliyun kafka]$ ./bin/kafka-server-start.sh config/server-1.properties &
+[houzhenguo@aliyun kafka]$ ./bin/kafka-server-start.sh config/server-2.properties &
+```
+这样就启动了 3个kafka实例
+```
+[houzhenguo@aliyun ~]$ jps
+18560 Kafka
+14979 Kafka
+17284 ConsoleConsumer
+18123 Kafka
+1487 QuorumPeerMain
+18991 Jps
+[houzhenguo@aliyun ~]$ 
+
+```
+4. 创建一个 分区 3个备份的topic
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 3 --partitions 1 --topic replicated-topic-test
+
+```
+5. 查看每台 Broker 的信息
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic replicated-topic-test
+Topic: replicated-topic-test	PartitionCount: 1	ReplicationFactor: 3	Configs: segment.bytes=1073741824
+	Topic: replicated-topic-test	Partition: 0	Leader: 2	Replicas: 2,1,0	Isr: 2,1,0
+```
+ 输出的解释如下：
+
+ 第一行是 所有 分区的概要，下面的每一行是 关于这个 topic 每个分区的信息。
+
+ - leader 节点 负责 该分区 所有的读写。（ follower只是备份的功能，不做读写）
+ - replicas 时当前 备份信息
+ - isr 相当于必须同步的一个 备份 列表（这个不是特别明白，可能要求这个列表中的全部同步完成才算成功，还有就是leader在这个列表中选出，因为优秀）
+
+6. 向我们新创建的topic中发送数据
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic replicated-topic-test
+>replicated msg 1
+>replicated msg 2
+```
+7. 消费我们刚才创建的消息
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic replicated-topic-test
+replicated msg 1
+replicated msg 2
+```
+8. 测试 集群的健壮性
+```
+ps aux | grep server-2.properties # 找到 leader 的pid,kill掉
+[houzhenguo@aliyun kafka]$ kill -9 18560
+
+```
+可以看到 leader 的新人选已经切换称为了 某个 followers ,node2(broker.id=2) 已经不在时 in-sync的集合数据。
+```bash
+[houzhenguo@aliyun kafka]$ ./bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic replicated-topic-test
+Topic: replicated-topic-test	PartitionCount: 1	ReplicationFactor: 3	Configs: segment.bytes=1073741824
+	Topic: replicated-topic-test	Partition: 0	Leader: 1	Replicas: 2,1,0	Isr: 1,0
+[houzhenguo@aliyun kafka]$ 
+```
+但是 kafka 依旧可以对外提供服务
+```bash
+[2020-02-27 11:33:51,801] WARN [Consumer clientId=consumer-console-consumer-25541-1, groupId=console-consumer-25541] Connection to node 2 (aliyun/172.17.10.156:9094) could not be established. Broker may not be available. (org.apache.kafka.clients.NetworkClient)
+^CProcessed a total of 2 messages
+[houzhenguo@aliyun kafka]$ ./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic replicated-topic-test
+replicated msg 1
+replicated msg 2
+```
+---
 
 Kafka 中消息是以 topic 进行分类的，生产者生产消息，消费者消费消息，都是面向 topic
 的。
