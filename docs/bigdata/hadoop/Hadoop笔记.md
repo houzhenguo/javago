@@ -110,4 +110,40 @@ B站地址 https://www.bilibili.com/video/av15390641
 ```
 注意 HADOOP_HOME 环境变量的配置，防止今后安装 hadoop生态圈的框架出现问题。
 
+Hadoop 是 Java 编写，Hadoop命令的执行 需要 JAVA_HOME的环境变量
+    保证 JAVA_HOME 和 HADOOP_HOME 是全局环境便令
 
+    在使用 Hadoop 时候，各个进程之间需要进行通信，Namenode 需要 DataNode 进行通信，通常使用主机名通过解析后得到各个进程的ip地址
+
+    保证在 /etc/hosts 中配置当前集群中所有主机的主机名和  ip地址的映射。
+
+### 使用
+
+    HDFS: 分布式文件系统，有两种模式。
+        1. 完全分布式文件系统
+            完全分布式，和 伪分布式
+            集群中有 N台集器
+            将 HDFS 中的核心进程分布在 N 台机器上
+        2. 本地文件系统模式
+            集群中只有本地这台机器
+
+    如何判断当前的 当前的HDFS 是分布式文件系统还是本地文件系统：
+        取决于参数：fs.defalutFS(见于core-defalut.xml中)
+    
+    MapReduce： 负责大数据的计算
+        1. 参考 MapReduce 编程模式，进行编程，将程序 打成jar包
+        2. 运行 jar包
+            取决于参数 mapreduce.framework.name=yarn/local -- 在map-defalut.xml
+            a. 将jar提交到 yarn
+            b. 将jar包在本地环境运行
+
+配置文件
+
+    hadoop启动时候，会默认从 $HADOOP_HOME/etc/hadoop 加载配置文件，
+        加载 core-defalut.xml,hdfs-defalult.xml,yarn-defalut.xml,mapred-default.xml
+
+        这4个配置 文件中，已经对常用的参数 进行了默认的赋值。,随着jar包直接加载。
+
+        继续从 $HADOOP_HOME/etc/hadoop加载
+
+        core-site.xml,hdfs-site.xml,yarn-site.xml,mapred-site.xml
