@@ -1,5 +1,5 @@
 welcome to houzhenguo java learning
-本仓库仅作为个人使用，没有任何商业用途。如果大家喜欢，可以copy一份。本仓库可能会引用大量我认为优秀的文章，但是我都会标注文章的来源。建立本仓库的目的就是将我认为比较优秀的文章整合一下。
+本仓库仅作为个人使用，没有任何商业用途。如果大家喜欢，可以copy一份。本仓库可能会引用大量我认为优秀的文章，但是我都会标注文章的来源。建立本仓库的目的就是将我认为比较优秀的文章整合一下。Readme 并不包含 全部的 文章，如果需要全部的文章，请 clone 一份。
 
 ## JVM相关   
 - [JVM运行时内存模型](./docs/jvm/jvm系列(一)内存结构.md)
@@ -59,6 +59,8 @@ welcome to houzhenguo java learning
 - [漫画算法](./docs/datastructure/other/漫画算法.md)
 - [一致Hash算法](./docs/datastructure/other/一致hash算法.md)
 
+- [亿级算法](./docs/datastructure/bigdata/亿级算法.md)
+
 ## Netty相关
 
 - [Netty](./docs/netty/netty到底是什么.md)
@@ -95,3 +97,10 @@ welcome to houzhenguo java learning
 ## Tools
 
 - [Git常用操作总结](./docs/tools/Git常用操作总结.md)
+
+## 优秀的文章
+- [消灭Java坏味道](./docs/articles/消灭Java代码的“坏味道”.md)
+
+## 大数据相关
+
+- [Hadoop笔记](./docs/bigdata/hadoop/Hadoop笔记.md)
