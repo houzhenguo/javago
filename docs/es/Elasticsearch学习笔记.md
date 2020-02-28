@@ -1393,3 +1393,736 @@ ES 也支持过滤查询，如term、range、match等。
 
 > 建议：
 做精确匹配搜索时，最好用过滤语句，因为过滤语句可以缓存数据。
+---
+# 分词
+
+## 中文分词
+
+### 什么是分词
+
+分词就是指将一个文本 转化成一些列单词的过程，也叫文本分析，在 ES 中称之为 Analysis .
+eg: 我是中国人 -> 我/ 是/中国人/中国
+
+## 分词的API
+
+> 指定分词器进行分词
+```json
+POST :9200/_analyze
+// 请求体
+{
+	"analyzer": "standard",
+	"text": "hello world"
+}
+// Response 分词之后的结果
+{
+    "tokens": [
+        {
+            "token": "hello", // 可以看到 hello 与 world 分别拆分称为两个单词，高亮显示
+            "start_offset": 0,
+            "end_offset": 5,
+            "type": "<ALPHANUM>",
+            "position": 0      // 还可以看到 分词的位置。
+        },
+        {
+            "token": "world",
+            "start_offset": 6,
+            "end_offset": 11,
+            "type": "<ALPHANUM>",
+            "position": 1
+        }
+    ]
+}
+```
+
+> 指定索引的分词
+```json
+POST /itcast/_analyze
+// 请求体
+{
+	"analyzer": "standard",
+	"field": "hobby",
+	"text": "听音乐"
+}
+// Response 分词结果
+{
+    "tokens": [
+        {
+            "token": "听",
+            "start_offset": 0,
+            "end_offset": 1,
+            "type": "<IDEOGRAPHIC>",
+            "position": 0
+        },
+        {
+            "token": "音",
+            "start_offset": 1,
+            "end_offset": 2,
+            "type": "<IDEOGRAPHIC>",
+            "position": 1
+        },
+        {
+            "token": "乐",
+            "start_offset": 2,
+            "end_offset": 3,
+            "type": "<IDEOGRAPHIC>",
+            "position": 2
+        }
+    ]
+}
+// 通过结果可以看出，听音乐被分成一个字一个字的，因为它是英文分词方式
+```
+
+## 中文分词
+
+中文分词的难点在于，在汉语中没有明显的词汇分界点，在英语中，空格可以作为分隔符，中文分词分割不正确就有可能造成歧义。
+
+常见的中文分词器，`IK`,`jieba`,`THULAC` 推荐使用IK分词器，（分词可以用来 言论云图）
+
+> IK Analyzer是一个开源的，基于java语言开发的轻量级的中文分词工具包。从2006年12月推出1.0版开始，
+IKAnalyzer已经推出了3个大版本。最初，它是以开源项目Luence为应用主体的，结合词典分词和文法分析算
+法的中文分词组件。新版本的IK Analyzer 3.0则发展为面向Java的公用分词组件，独立于Lucene项目，同时提
+供了对Lucene的默认优化实现。
+采用了特有的“正向迭代最细粒度切分算法“，具有80万字/秒的高速处理能力 采用了多子处理器分析模式，支
+持：英文字母（IP地址、Email、URL）、数字（日期，常用中文数量词，罗马数字，科学计数法），中文词汇
+（姓名、地名处理）等分词处理。 优化的词典存储，更小的内存占用。
+
+IK 分词器的 ES 插件地址： 
+
+https://github.com/medcl/elasticsearch-analysis-ik
+
+由于 IK 对于每个 es 有版本限制，所以下载相关版本的ik
+
+我的下载版本： elasticsearch-analysis-ik-6.5.4.zip
+
+## IK 插件安装方式
+
+```bash
+# 将 elasticsearch-analysis-ik-6.5.4.zip 解压 到 es/plugins/ik 目录下即可
+[houzhenguo@aliyun plugins]$ mkdir ik
+cp elasticsearch-analysis-ik-6.5.4.zip ./elasticsearch-6.5.4/plugins/ik/
+#解压
+unzip elasticsearch-analysis-ik-6.5.4.zip
+# 重启
+[houzhenguo@aliyun elasticsearch-6.5.4]$ ./bin/elasticsearch
+```
+![es-head](./images/es-11.png)
+
+> 测试
+```json
+POST /_analyze
+// 请求体
+{
+	"analyzer": "ik_max_word", // 指定分词器
+	"text": "我是中国人"
+}
+// Response 分词结果 已经对中文进行了分词
+{
+    "tokens": [
+        {
+            "token": "我",
+            "start_offset": 0,
+            "end_offset": 1,
+            "type": "CN_CHAR",
+            "position": 0
+        },
+        {
+            "token": "是",
+            "start_offset": 1,
+            "end_offset": 2,
+            "type": "CN_CHAR",
+            "position": 1
+        },
+        {
+            "token": "中国人",
+            "start_offset": 2,
+            "end_offset": 5,
+            "type": "CN_WORD",
+            "position": 2
+        },
+        {
+            "token": "中国",
+            "start_offset": 2,
+            "end_offset": 4,
+            "type": "CN_WORD",
+            "position": 3
+        },
+        {
+            "token": "国人",
+            "start_offset": 3,
+            "end_offset": 5,
+            "type": "CN_WORD",
+            "position": 4
+        }
+    ]
+}
+```
+
+## 全文搜索
+ 
+ 全文搜索最重要的方面是：
+
+ - 相关性（Relevance） 它是评价查询与其结果间的相关程度，并根据这种相关程度对结果排名的一种能力，这
+种计算方式可以是 TF/IDF 方法、地理位置邻近、模糊相似，或其他的某些算法。
+- 分词（Analysis） 它是将文本块转换为有区别的、规范化的 token 的一个过程，目的是为了创建倒排索引以及
+查询倒排索引。
+
+以下操作 需要删除掉 itcast 索引重新创建. 可以在 es-header 中进行操作删除索引。
+
+### 1. 构造索引
+```json
+PUT 9200/itcast
+// 请求体
+{
+	"settings": {
+		"index": {
+			"number_of_shards": "1",
+			"number_of_replicas": "0"
+		}
+	},
+	"mappings": {
+		"person": {
+			"properties": {
+				"name": {
+					"type": "text"
+				},
+				"age": {
+					"type": "integer"
+				},
+				"mail": {
+					"type": "keyword" // keyword 类型的不需要进行分词
+				},
+				"hobby": {
+					"type": "text",
+					"analyzer": "ik_max_word" // 这里开始使用ik分词器
+				}
+			}
+		}
+	}
+}
+
+```
+> 批量插入数据
+```json
+POST /itcast/_bulk
+
+// 请求体 注意换行
+
+{"index":{"_index":"itcast","_type":"person"}}
+{"name":"张三","age": 20,"mail": "111@qq.com","hobby":"羽毛球、乒乓球、足球"}
+{"index":{"_index":"itcast","_type":"person"}}
+{"name":"李四","age": 21,"mail": "222@qq.com","hobby":"羽毛球、乒乓球、足球、篮球"}
+{"index":{"_index":"itcast","_type":"person"}}
+{"name":"王五","age": 22,"mail": "333@qq.com","hobby":"羽毛球、篮球、游泳、听音乐"}
+{"index":{"_index":"itcast","_type":"person"}}
+{"name":"赵六","age": 23,"mail": "444@qq.com","hobby":"跑步、游泳、篮球"}
+{"index":{"_index":"itcast","_type":"person"}}
+{"name":"孙七","age": 24,"mail": "555@qq.com","hobby":"听音乐、看电影、羽毛球"}
+
+```
+![](./images/es-12.png)
+
+### 2. 单词搜索
+```json
+POST /itcast/person/_search
+// 请求体
+{
+	"query": {
+		"match": {
+			"hobby": "音乐"
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+// Response
+{
+    "took": 414,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": 2,
+        "max_score": 0.81652206,
+        "hits": [
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "GI13inABt3AZOsRHoz6N",
+                "_score": 0.81652206,
+                "_source": {
+                    "name": "王五",
+                    "age": 22,
+                    "mail": "333@qq.com",
+                    "hobby": "羽毛球、篮球、游泳、听音乐"
+                },
+                "highlight": {
+                    "hobby": [
+                        "羽毛球、篮球、游泳、听<em>音乐</em>" // 可以看到音乐被高亮显示了
+                    ]
+                }
+            },
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "Go13inABt3AZOsRHoz6N",
+                "_score": 0.81652206,
+                "_source": {
+                    "name": "孙七",
+                    "age": 24,
+                    "mail": "555@qq.com",
+                    "hobby": "听音乐、看电影、羽毛球"
+                },
+                "highlight": {
+                    "hobby": [
+                        "听<em>音乐</em>、看电影、羽毛球"
+                    ]
+                }
+            }
+        ]
+    }
+}
+```
+
+过程说明：
+
+1. 检查字段的类型
+    爱好 hobby 字段是一个 text类型（指定了IK分词器)，者意味着查询字符串本身也应该被分词。
+2. 分析查询字符串
+    将查询的字符串 音乐传入 IK 分词器中，输出的结果是单个项 “音乐”（不可再分）。因为只有一个单词项，所以 match查询执行的是单个底层 term查询
+3.  查找匹配文档
+    用 term 查询在倒排索引中查找音乐，然后获取包含该项的文档，本例的结果是文档 3，5
+4. 为每个文档评分
+    用 term 查询计算每个文档相关度评分 `_score` ，这事种 将 词频 （term frequency，即词 “音乐” 在相关文档的
+hobby 字段中出现的频率）和 反向文档频率（inverse document frequency，即词 “音乐” 在所有文档的
+hobby 字段中出现的频率），以及字段的长度（即字段越短相关度越高）相结合的计算方式。
+
+### 3. 多词搜索
+
+```json
+POST /itcast/person/_search
+// 请求体
+{
+	"query": {
+		"match": {
+			"hobby": "音乐 打篮球"
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+// Response 
+{
+    "took": 6,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": 4,
+        "max_score": 1.3192271,
+        "hits": [
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "GI13inABt3AZOsRHoz6N",
+                "_score": 1.3192271,
+                "_source": {
+                    "name": "王五",
+                    "age": 22,
+                    "mail": "333@qq.com",
+                    "hobby": "羽毛球、篮球、游泳、听音乐"
+                },
+                "highlight": {
+                    "hobby": [
+                        "羽毛球、<em>篮球</em>、游泳、听<em>音乐</em>"
+                    ]
+                }
+            },
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "Go13inABt3AZOsRHoz6N",
+                "_score": 0.81652206,
+                "_source": {
+                    "name": "孙七",
+                    "age": 24,
+                    "mail": "555@qq.com",
+                    "hobby": "听音乐、看电影、羽毛球"
+                },
+                "highlight": {
+                    "hobby": [
+                        "听<em>音乐</em>、看电影、羽毛球"
+                    ]
+                }
+            },
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "GY13inABt3AZOsRHoz6N",
+                "_score": 0.6987338,
+                "_source": {
+                    "name": "赵六",
+                    "age": 23,
+                    "mail": "444@qq.com",
+                    "hobby": "跑步、游泳、篮球"
+                },
+                "highlight": {
+                    "hobby": [
+                        "跑步、游泳、<em>篮球</em>"
+                    ]
+                }
+            },
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "F413inABt3AZOsRHoz6N",
+                "_score": 0.50270504,
+                "_source": {
+                    "name": "李四",
+                    "age": 21,
+                    "mail": "222@qq.com",
+                    "hobby": "羽毛球、乒乓球、足球、篮球"
+                },
+                "highlight": {
+                    "hobby": [
+                        "羽毛球、乒乓球、足球、<em>篮球</em>" // 篮球高亮
+                    ]
+                }
+            }
+        ]
+    }
+}
+```
+
+可以看到，包含了“音乐”、“篮球”的数据都已经被搜索到了。
+可是，搜索的结果并不符合我们的预期，因为我们想搜索的是既包含“音乐”又包含“篮球”的用户，显然结果返回
+的“或”的关系。
+```json
+POST /itcast/person/_search
+// 请求体
+{
+	"query": {
+		"match": {
+			"hobby": {
+				"query": "音乐 篮球",
+				"operator": "and"
+			}
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+// Response
+    "hits": {
+        "total": 1,
+        "max_score": 1.3192271,
+        "hits": [
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "GI13inABt3AZOsRHoz6N",
+                "_score": 1.3192271,
+                "_source": {
+                    "name": "王五",
+                    "age": 22,
+                    "mail": "333@qq.com",
+                    "hobby": "羽毛球、篮球、游泳、听音乐"
+                },
+                "highlight": {
+                    "hobby": [
+                        "羽毛球、<em>篮球</em>、游泳、听<em>音乐</em>"
+                    ]
+                }
+            }
+        ]
+    }
+```
+
+前面我们测试了“OR” 和 “AND”搜索，这是两个极端，其实在实际场景中，并不会选取这2个极端，更有可能是选取这
+种，或者说，只需要符合一定的相似度就可以查询到数据，在Elasticsearch中也支持这样的查询，通过
+minimum_should_match来指定匹配度，如：70%；
+
+> 相似度应该多少合适，需要在实际的需求中进行反复测试，才可得到合理的值。
+
+```json
+POST /itcast/person/_search
+// 请求体
+{
+	"query": {
+		"match": {
+			"hobby": {
+				"query": "游泳 羽毛球",
+				"minimum_should_match": "80%" // 相似度 越高，返回的数量越少
+			}
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+```
+
+### 组合搜索
+
+在搜索的时候，可以使用过滤器中讲过的 bool 组合查询
+```json
+POST /itcast/person/_search
+// 请求体
+{
+	"query": {
+		"bool": {
+			"must": {
+				"match": {
+					"hobby": "篮球" // 必须有篮球
+				}
+			},
+			"must_not": {
+				"match": {
+					"hobby": "音乐" // 必须没有音乐
+				}
+			},
+			"should": [{
+				"match": {
+					"hobby": "游泳" // 可以有 游泳
+				}
+			}]
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+
+// Response
+        "hits": [
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "GY13inABt3AZOsRHoz6N",
+                "_score": 1.8336569,
+                "_source": {
+                    "name": "赵六",
+                    "age": 23,
+                    "mail": "444@qq.com",
+                    "hobby": "跑步、游泳、篮球"
+                },
+                "highlight": {
+                    "hobby": [
+                        "跑步、<em>游泳</em>、<em>篮球</em>" // 符合条件
+                    ]
+                }
+            },
+            {
+                "_index": "itcast",
+                "_type": "person",
+                "_id": "F413inABt3AZOsRHoz6N",
+                "_score": 0.50270504,
+                "_source": {
+                    "name": "李四",
+                    "age": 21,
+                    "mail": "222@qq.com",
+                    "hobby": "羽毛球、乒乓球、足球、篮球"
+                },
+                "highlight": {
+                    "hobby": [
+                        "羽毛球、乒乓球、足球、<em>篮球</em>"
+                    ]
+                }
+            }
+        ]
+```
+
+> 评分的计算规则
+bool 查询会为每个文档计算相关度评分 _score ， 再将所有匹配的 must 和 should 语句的分数 _score 求和，
+最后除以 must 和 should 语句的总数。
+must_not 语句不会影响评分； 它的作用只是将不相关的文档排除。]
+
+默认情况下，should中的内容不是必须匹配的，如果查询语句中没有must，那么就会至少匹配其中一个。当然了，
+也可以通过`minimum_should_match`参数进行控制，该值可以是数字也可以的百分比。
+示例：
+```json
+// 至少匹配两个
+{
+	"query": {
+		"bool": {
+			"should": [{
+					"match": {
+						"hobby": "游泳"
+					}
+				},
+				{
+					"match": {
+						"hobby": "篮球"
+					}
+				},
+				{
+					"match": {
+						"hobby": "音乐"
+					}
+				}
+			],
+			"minimum_should_match": 2 // should 中的三个词，至少满足2 个
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+```
+
+### 权重
+有些时候，我们可能需要对某些词增加权重来影响该条数据的得分。如下：
+
+> 搜索关键字为“游泳篮球”，如果结果中包含了“音乐”权重为10，包含了“跑步”权重为2。
+```json
+{
+	"query": {
+		"bool": {
+			"must": {
+				"match": {
+					"hobby": {
+						"query": "游泳篮球",
+						"operator": "and"
+					}
+				}
+			},
+			"should": [{
+					"match": {
+						"hobby": {
+							"query": "音乐",
+							"boost": 10
+						}
+					}
+				},
+				{
+					"match": {
+						"hobby": {
+							"query": "跑步",
+							"boost": 2
+						}
+					}
+				}
+			]
+		}
+	},
+	"highlight": {
+		"fields": {
+			"hobby": {}
+		}
+	}
+}
+```
+
+---
+# 集群
+
+## 集群节点
+
+ELasticsearch的集群是由多个节点组成的，通过cluster.name设置集群名称，并且用于区分其它的集群，每个节点
+通过node.name指定节点的名称。
+在Elasticsearch中，节点的类型主要有4种：
+
+- master节点
+    - 配置文件中node.master属性为true(默认为true)，就`有资格`被选为master节点。
+    - master节点用于控制整个集群的操作。比如`创建或删除索引`，管理其它非master节点等。
+- data节点
+    - 配置文件中node.data属性为true(默认为true)，就有资格被设置成`data节点`。
+    - data节点主要用于执行数据相关的操作。比如文档的CRUD。
+- 客户端节点
+    - 配置文件中node.master属性和node.data属性均为false。
+    - 该节点不能作为master节点，也不能作为data节点。
+    - 可以作为客户端节点，用于响应用户的请求，把请求转发到其他节点 (相当于路由)
+- 部落节点
+    - 当一个节点配置tribe.*的时候，它是一个特殊的客户端，它可以连接多个集群，在所有连接的集群上执行
+搜索和其他操作。
+
+## 集群的搭建
+
+本次集群的搭建只限自己的服务器，搭建的是伪集群。
+
+1. 删除到 es/logs 下面的数据。 rm -rf *
+2.  删除 es/data 下面的数据
+```bash
+rm -rf ./es/logs * # 主要是用来清空以前的数据
+rm -rf ./es/data/* 
+mkdir cluster
+cd cluster
+mkdri cluster1
+mkdri cluster2
+mkdri cluster3
+cp elasticsearch-6.5.4/* ./cluster/cluster2/ -R # 分别copy
+# 修改配置文件
+# 搭建的是伪集群
+cluster1 配置情况,通过修改端口号分别配置 3个节点
+cluster.name: es-cluster-hou
+node.name: node01
+node.master: true
+node.data: true
+http.port: 9200
+discovery.zen.minimum_master_nodes: 2
+#discovery.zen.ping.unicast.hosts: ["192.168.40.133","192.168.40.134","192.168.40.135"]
+
+# 分别启动三个节点
+```
+![](./images/es-13.png)
+
+创建索引
+![](./images/es-14.png)
+
+其中粗线框为 主分片，细的是副本分片。
+
+> 查看集群的 状态
+
+这里我开放了 9200 - 9205 端口防火墙
+```json
+GET 9201/_cluster/health // 这里应该不限制端口号，因为我的端口号 00 01，02 三个节点都是开放的。
+// Response
+{
+    "cluster_name": "es-cluster-hou",
+    "status": "green",
+    "timed_out": false,
+    "number_of_nodes": 3,
+    "number_of_data_nodes": 3,
+    "active_primary_shards": 5,
+    "active_shards": 10,
+    "relocating_shards": 0,
+    "initializing_shards": 0,
+    "unassigned_shards": 0,
+    "delayed_unassigned_shards": 0,
+    "number_of_pending_tasks": 0,
+    "number_of_in_flight_fetch": 0,
+    "task_max_waiting_in_queue_millis": 0,
+    "active_shards_percent_as_number": 100.0
+}
+```
+
+集群中三种颜色
+
+颜色| 含义 |
+-|-|
+green |所有主要分片和复制分片都可用|
+yellow |所有主要分片可用，但不是所有复制分片都可用|
+red |不是所有的主要分片都可用|
+
