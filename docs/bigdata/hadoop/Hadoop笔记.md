@@ -117,6 +117,78 @@ Hadoop 是 Java 编写，Hadoop命令的执行 需要 JAVA_HOME的环境变量
 
     保证在 /etc/hosts 中配置当前集群中所有主机的主机名和  ip地址的映射。
 
+备注：
+vim /etc/sudoers // 这里面可以添加 普通用户的root权限
+
+## 安装流程
+ 1. 准备工作
+```bash
+# 1.  上传 jar 包
+hadoop-2.7.2.tar.gz
+# 2. 解压tar.gz
+tar -xvzf hadoop-2.7.2.tar.gz
+# 3. 文件说明
+[houzhenguo@aliyun bin]$ pwd
+/home/houzhenguo/soft/bigdata/hadoop/hadoop-2.7.2/bin
+[houzhenguo@aliyun bin]$ ll
+total 320
+-rwxr-xr-x 1 houzhenguo houzhenguo 109037 May 22  2017 container-executor
+-rwxr-xr-x 1 houzhenguo houzhenguo   6488 May 22  2017 hadoop
+-rwxr-xr-x 1 houzhenguo houzhenguo   8786 May 22  2017 hadoop.cmd
+-rwxr-xr-x 1 houzhenguo houzhenguo  12223 May 22  2017 hdfs # 分布式文件系统
+-rwxr-xr-x 1 houzhenguo houzhenguo   7478 May 22  2017 hdfs.cmd
+-rwxr-xr-x 1 houzhenguo houzhenguo   5953 May 22  2017 mapred
+-rwxr-xr-x 1 houzhenguo houzhenguo   6310 May 22  2017 mapred.cmd
+-rwxr-xr-x 1 houzhenguo houzhenguo   1776 May 22  2017 rcc
+-rwxr-xr-x 1 houzhenguo houzhenguo 126443 May 22  2017 test-container-executor
+-rwxr-xr-x 1 houzhenguo houzhenguo  13352 May 22  2017 yarn
+-rwxr-xr-x 1 houzhenguo houzhenguo  11386 May 22  2017 yarn.cmd
+# sbin superuserbin
+
+/home/houzhenguo/soft/bigdata/hadoop/hadoop-2.7.2/etc/hadoop # hadoop的配置文件
+
+share # 是常用的jar包
+# 4. 配置环境变量
+```
+
+确保 环境变量中有 JAVA_HOME
+
+2. 查看 hadoop版本
+```bash
+# bin 下面运行
+./hadoop version
+```
+3. 将hadoop bin.sbin 添加到 环境变量，便于今后 其他组件的使用。
+
+```
+unset -f pathmunge
+export JAVA_HOME=/usr/java/jdk1.8.0_171
+HADOOP_HOME=/home/houzhenguo/soft/bigdata/hadoop/hadoop-2.7.2
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+
+export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+export HADOOP_HOME
+
+```
+```bash
+[root@aliyun houzhenguo]# vim /etc/profile
+[root@aliyun houzhenguo]# source /etc/profile
+
+[root@aliyun houzhenguo]# hadoop version
+Hadoop 2.7.2 # 环境变量配置成功
+
+```
+
+
+## hadoop 目录组成
+    前三个常用
+    bin: 常用的命令
+    sbin： 管理集群常用的命令
+    etc： 配置文件所在的目录
+    lib: 本地底层环境相关的文件，默认的，不需要修改
+    share: jar包
+
+
 ### 使用
 
     HDFS: 分布式文件系统，有两种模式。
@@ -124,26 +196,42 @@ Hadoop 是 Java 编写，Hadoop命令的执行 需要 JAVA_HOME的环境变量
             完全分布式，和 伪分布式
             集群中有 N台集器
             将 HDFS 中的核心进程分布在 N 台机器上
+            fs.defalutFS=hdfs://namenode所在的主机名 +端口号
+            使用 HDFS前，启动 HDFS的核心进程。
+                指定NameNode 的工作目录，默认在 tmp中
+                格式化 NameNode
+                    作用： 产生namenode 的工作目录
+                          产生namenode的核心文件 fsi
+
         2. 本地文件系统模式
             集群中只有本地这台机器
 
     如何判断当前的 当前的HDFS 是分布式文件系统还是本地文件系统：
         取决于参数：fs.defalutFS(见于core-defalut.xml中)
+        默认为 file:/// 这是个协议，默认为本地文件系统。
     
     MapReduce： 负责大数据的计算
         1. 参考 MapReduce 编程模式，进行编程，将程序 打成jar包
         2. 运行 jar包
-            取决于参数 mapreduce.framework.name=yarn/local -- 在map-defalut.xml
+            取决于参数 mapreduce.framework.name=yarn/local -- 在map-defalut.xml，默认local
             a. 将jar提交到 yarn
+                    使用 YarnRunner
             b. 将jar包在本地环境运行
+                    使用 LocalJobRunner提交运行
+        运行程序： hadoop -jar xxx.jar 主类名
 
-配置文件
+    配置文件
 
-    hadoop启动时候，会默认从 $HADOOP_HOME/etc/hadoop 加载配置文件，
-        加载 core-defalut.xml,hdfs-defalult.xml,yarn-defalut.xml,mapred-default.xml
+        hadoop启动时候，会默认从 $HADOOP_HOME/etc/hadoop 加载配置文件，
+            加载 core-defalut.xml,hdfs-defalult.xml,yarn-defalut.xml,mapred-default.xml
 
-        这4个配置 文件中，已经对常用的参数 进行了默认的赋值。,随着jar包直接加载。
+            这4个配置 文件中，已经对常用的参数 进行了默认的赋值。,随着jar包直接加载。
 
-        继续从 $HADOOP_HOME/etc/hadoop加载
+            继续从 $HADOOP_HOME/etc/hadoop加载
 
-        core-site.xml,hdfs-site.xml,yarn-site.xml,mapred-site.xml
+            core-site.xml,hdfs-site.xml,yarn-site.xml,mapred-site.xml 可以自定义 xxx.defalut.xml的参数值
+            
+
+    分布式的HDFS
+
+        
