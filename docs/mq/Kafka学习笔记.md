@@ -327,6 +327,11 @@ producer 收到 ack，就会进行下一轮的发送，否则重新发送数据�
 
 ![保证可用性](./images/kafka-8.png) 
 
+### 副本数据同步策略
+
+半数以上完成同步，就发送 ack,优点延迟低，缺点，选举新leader时候，容忍n台节点故障，
+需要 2n+1个副本
+
 Kafka的同步方案：
 
 全部完成同步，才发送ack。
@@ -339,3 +344,39 @@ Leader 维护了一个动态的 in-sync replica set (ISR)，意为和 leader 保
 长时间 未 向 leader 同 步 数 据 ， 则 该 follower 将 被 踢 出 ISR ， 该 时 间 阈 值 由
 
 replica.lag.time.max.ms 参数设定。Leader 发生故障之后，就会从 ISR 中选举新的 leader。
+
+ISR 加入条件： 
+
+保留时间延迟，在 延迟时间内在 isr中，10s中
+
+### ack应答机制
+
+对于某些不太重要的数据，对数据的可靠性要求不是很高，能够容忍数据的少量丢失，
+所以没必要等 ISR 中的 follower 全部接收成功。
+所以 Kafka 为用户提供了三种可靠性级别，用户根据对可靠性和延迟的要求进行权衡，
+选择以下的配置。
+acks 参数配置：
+
+acks： 
+- 0：producer 不等待 broker 的 ack，这一操作提供了一个最低的延迟，broker 一接收到还
+`没有写入磁盘就已经返回`，当 broker 故障时有可能`丢失数据`； 
+- 1：producer 等待 broker 的 ack，partition 的 `leader 落盘成功后返回` ack，如果在 follower
+同步成功之前 leader 故障，那么将会`丢失数据`；
+
+- -1（all）：producer 等待 broker 的 ack，partition 的 leader 和 follower 全部落盘成功后才
+返回 ack。但是如果在 follower 同步完成后，broker 发送 ack 之前，leader 发生故障，那么会
+造成数据重复
+
+![消费者可靠性](./images/kafka-9.png) 
+
+（1）follower 故障
+follower 发生故障后会被临时踢出 ISR，待该 follower 恢复后，follower 会读取本地磁盘
+记录的上次的 HW，并将 log 文件高于 HW 的部分截取掉，从 HW 开始向 leader 进行同步。
+等该 `follower 的 LEO 大于等于该 Partition 的 HW`，即 follower 追上 leader 之后，就可以重
+新加入 ISR 了。
+（2）leader 故障
+leader 发生故障之后，会从 ISR 中选出一个新的 leader，之后，为保证多个副本之间的
+
+数据一致性，其余的 follower 会先将各自的 log 文件高于 HW 的部分截掉，然后从新的 leader
+同步数据。
+注意：这只能保证副本之间的数据一致性，并不能保证数据不丢失或者不重复。
