@@ -201,7 +201,7 @@ Hadoop 2.7.2 # 环境变量配置成功
                 指定NameNode 的工作目录，默认在 tmp中
                 格式化 NameNode
                     作用： 产生namenode 的工作目录
-                          产生namenode的核心文件 fsi
+                          产生namenode的核心文件 fsimage
 
         2. 本地文件系统模式
             集群中只有本地这台机器
@@ -233,5 +233,10 @@ Hadoop 2.7.2 # 环境变量配置成功
             
 
     分布式的HDFS
+        常见问题
+            1. 注意端口号占用的问题
+            2. 主机名的命名 不支持下划线，不要纯数字
+            3. 启动 namenode 进程之前，需要格式化，只需要格式化一次，目的产生namenode 的工作目录
+            4. 先启动 namenode ,再启动datanode
 
         
