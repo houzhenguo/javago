@@ -1,5 +1,6 @@
 
 视频地址： https://www.bilibili.com/video/av65556024
+清华大学镜像地址： https://mirrors.tuna.tsinghua.edu.cn/
 
 ## Hive
 
@@ -60,3 +61,85 @@ Hive 基于 Hadoop的一个数据仓库工具。将结构化的数据文件映�
 2. 文档地址 https://cwiki.apache.org/confluence/display/Hive/GettingStarted
 3. 下载地址 http://archive.apache.org/dist/hive/
 4. github地址 https://github.com/apache/hive
+5. https://mirrors.tuna.tsinghua.edu.cn/apache/hive/hive-1.2.2/apache-hive-1.2.2-bin.tar.gz
+
+## 安装流程
+1.  解压包
+2. 修改 config 下面的 hive-env.sh.template
+```bash
+export HADOOP_HOME=/home/houzhenguo/soft/bigdata/hadoop/hadoop-2.7.2
+export HIVE_CONF_DIR=/home/houzhenguo/soft/bigdata/hive/apache-hive-1.2.2-bin/conf
+
+```
+3. 改名 mv hive-env.sh.template hive-env.sh
+4. 启动 [houzhenguo@aliyun apache-hive-1.2.2-bin]$ ./bin/hive
+
+## hive的命令练习
+```
+hive> show databases; 
+OK
+default
+Time taken: 0.903 seconds, Fetched: 1 row(s)
+hive> create table student(id int, name string);
+OK
+Time taken: 0.298 seconds
+hive> show tables;
+OK
+student
+Time taken: 0.024 seconds, Fetched: 1 row(s)
+hive> select * from student;
+OK
+Time taken: 0.48 seconds
+hive> insert into student values(1,"houzhenguo");
+hive> select * from student;
+OK
+1	houzhenguo
+Time taken: 0.08 seconds, Fetched: 1 row(s)
+
+```
+执行hadoop命令也可以 [houzhenguo@aliyun hadoop-2.7.2]$ hadoop fs -ls /user/hive/warehouse/student 查看到
+## 文件系统加载hive
+2. 导入 文本数据到 数据库
+hive> load data local inpath '/home/houzhenguo/soft/bigdata/hive/data/stu.txt' into table student;
+
+```txt
+// 格式
+1   zhangsan
+2   lisi
+```
+
+    hive> select * from student; //分隔符的问题
+    OK
+    1	houzhenguo
+    NULL	NULL
+    NULL	NULL
+    NULL	NULL
+    NULL	NULL
+
+    开放 Hadoop的http端口： 50070，外网可以访问
+
+创建 以 tab 分割的表 
+hive> create table stu(id int,name string) row format delimited fields terminated by "\t";
+
+hive> load data local inpath '/home/houzhenguo/soft/bigdata/hive/data/stu.txt' into table stu;
+Loading data to table default.stu
+Table default.stu stats: [numFiles=1, totalSize=42]
+OK
+Time taken: 0.236 seconds
+hive> select * from stu;
+OK
+1	zhangsan
+2	lisi
+3	wangwu2
+3	wangwu
+Time taken: 0.068 seconds, Fetched: 4 row(s)
+hive> 
+
+
+    直接通过hadoop put的方式
+    [houzhenguo@aliyun data]$ hadoop fs -put stu1.txt /user/hive/warehouse/stu
+
+    可以直接将 文本put / 下
+    load data inpath '/stu2.txt' into table stu;
+
+    本地上传相当于 copy ,hdfs 是 mv
