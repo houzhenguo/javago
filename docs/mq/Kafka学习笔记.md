@@ -5,6 +5,27 @@ Kafka 是 LinkedIn(领英) 开发的，前期主要用于处理海量的日志�
 
 Bilibili: https://www.bilibili.com/video/av65544753?from=search&seid=17708076357179732776
 
+## 思维导图
+1. broker
+    1. 存储数据
+    2. topic 逻辑概念，分区物理概念
+    3. 副本 备份 leader挂掉 ，isr 选出，同步时间进入 isr
+    4. 分区 kafka负载能力，消费的并行度
+    5. ack 数据丢失
+    6. isr HW(消费者可见最大的offset)),LEO(LogEndOffset),消费一致性问题
+2. producer
+    1. 分区 规则，指定分区号优先按分区来，指定key按hash来,否则轮询
+    2. ack 
+        0,只发送，不管丢不丢，不等待
+        1 learder 落盘
+        -1 isr所有的副本+ leader成功 all ,isr只有一个，也可能丢失数据，一般重复数据问题
+    3. 异步发送，回调函数，main,send线程
+    4. 组件 拦截器 序列化器 分区器 
+
+3. consumer
+    1. 消费者组，消费者组内不同消费者不能消费同一个分区
+    2. 分区分配策略问题
+
 ## 简介
 
 Kafka 是一个分布式的流式平台。
@@ -380,3 +401,168 @@ leader 发生故障之后，会从 ISR 中选出一个新的 leader，之后，�
 数据一致性，其余的 follower 会先将各自的 log 文件高于 HW 的部分截掉，然后从新的 leader
 同步数据。
 注意：这只能保证副本之间的数据一致性，并不能保证数据不丢失或者不重复。
+
+---
+
+# API
+
+## 生产者
+
+1. pom.xml导入maven依赖
+```xml
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>0.11.0.0</version>
+        </dependency>
+        <!-- 因为log 的问题导入-->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-nop -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+```
+2. 常见问题处理
+https://blog.csdn.net/qq_45453266/article/details/104256722
+并且控制台生产者监听 修改 localhost 为 内网ip
+连不上 kafka 需要修改配置文件server.properties
+```properties
+host.name=172.17.10.156  #内网ip
+advertised.host.name=xx.xxx.xxx.xx  #公网ip
+advertised.port=9092
+```
+3. Producer 生产者部分
+```java
+package com.houzhenguo.producer;
+import org.apache.kafka.clients.producer.*;
+import java.util.Properties;
+public class MyProducer {
+    public static void main(String[] args) {
+        //  建立链接相关的操作
+        Properties props = new Properties();
+        // 1.kafka集群，broker-list,这里使用 常量方式 bootstrap.servers多个用，分割
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "外网ip:9092");
+        // 2. 设置 ack,"acks"
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        // 3. 重试次数
+        props.put("retries", 1);
+        // 4. 批次大小 满16k就发送
+        props.put("batch.size", 16384);
+        // 5. 等待时间 ，等待 1ms也发送
+        props.put("linger.ms", 1);
+        // 6. RecordAccumulator 缓冲区大小
+        props.put("buffer.memory", 33554432);
+        // 7. 设置序列化器
+        props.put("key.serializer",
+                "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer",
+                "org.apache.kafka.common.serialization.StringSerializer");
+
+        // 8. 构建生产者
+        Producer<String, String> producer = new KafkaProducer<String, String>(props);
+        // 9. 构造数据发送数据
+        for (int i=0; i<10;i++) {
+            producer.send(new ProducerRecord<String, String>("replicated-topic-test",
+                    Integer.toString(i), Integer.toString(i)), new Callback() { // 回调函数
+                public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+                    if (e == null) {
+                        System.out.println("success");
+                    }else {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        // 10. 注意关闭，否则可能发送到 broker就关闭了
+        producer.close();
+        // 备注
+        // ./bin/kafka-topics.sh --list --bootstrap-server localhost:9092 查看 topic
+        // ./bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic replicated-topic-test
+        // ./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic replicated-topic-test
+    }
+}
+
+```
+4. 自定义分区器
+默认分区器： `DefaultPartitioner` 可以参考这个写
+
+```java
+public class MyPartitioner implements Partioner {
+    // 重写相应的方法
+}
+// 在 properties.put
+prop.("partitioner.class","com.houzhenguo.partition.MyPartitionner"); // 全类名
+```
+5. 消费者
+```java
+package com.houzhenguo.consumer;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import java.util.Arrays;
+import java.util.Properties;
+public class MyConsumer {
+    public static void main(String[] args) {
+        // 1. 创建消费者配置信息
+        Properties prop = new Properties();
+        // 2. 给配置信息赋值 bootstrap.servers
+        prop.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "外网ip:9092");
+        // 3. 配置自动提交
+        prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        // 4. 配置自动提交延迟 offset auto.commit.interval.ms
+        prop.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        // 5. key,value 的反序列化
+        prop.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+        prop.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+        // 6. 消费者组
+        prop.put(ConsumerConfig.GROUP_ID_CONFIG, "bigdata");
+        // 6.1 新加配置 解决 偏移量 有可能因为删除不存在,从头开始，或者从最新的开始,默认 latest
+        prop.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        // 7. 创建消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(prop);
+        // 8. 订阅主题
+        consumer.subscribe(Arrays.asList("replicated-topic-test"));
+        // 9. 获取数据
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(100);
+            // 10. 解析并打印 consumerRecords
+            for (ConsumerRecord<String, String> record: consumerRecords) {
+                System.out.println("key "+record.key()+"—"+record.value());
+            }
+        }
+    }
+}
+
+```
+6. 手动提交offset
+
+> 虽然自动提交 offset 十分简介便利，但由于其是基于时间提交的，开发人员难以把握
+offset 提交的时机。因此 Kafka 还提供了手动提交 offset 的 API。
+手动提交 offset 的方法有两种：分别是 commitSync（同步提交）和 commitAsync（异步
+提交）。两者的相同点是，都会将本次 poll 的一批数据最高的偏移量提交；不同点是，
+commitSync 阻塞当前线程，一直到提交成功，并且会自动失败重试（由不可控因素导致，
+也会出现提交失败）；而 commitAsync 则没有失败重试机制，故有可能提交失败。
+
+```java
+ // 关闭自动提交 offset
+ props.put("enable.auto.commit", "false");
+
+ //异步提交
+            consumer.commitAsync(new OffsetCommitCallback(){
+                public void onComplete(Map<TopicPartition,
+                                        OffsetAndMetadata> offsets, Exception exception) {
+                    if (exception != null) {
+                        System.err.println("Commit failed for" +
+                                offsets);
+                    }
+                }
+            });
+```
