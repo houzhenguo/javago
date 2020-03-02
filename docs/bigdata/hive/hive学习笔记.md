@@ -143,3 +143,128 @@ hive>
     load data inpath '/stu2.txt' into table stu;
 
     本地上传相当于 copy ,hdfs 是 mv
+
+
+---
+## mysql 相关事项的安装
+1. 安装mysql
+2. 配置相关的jar包
+    https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/Connector-J/mysql-connector-java-5.1.47.tar.gz
+
+    解压 ，将 mysql-connector-java-5.1.47-bin.jar 放到 hive/lib
+
+    [houzhenguo@aliyun mysql-connector-java-5.1.47]$ cp mysql-connector-java-5.1.47-bin.jar /home/houzhenguo/soft/bigdata/hive/apache-hive-1.2.2-bin/lib/
+3. 修改 hive的配置信息
+    vim hive-site.xml
+    ```xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+<property>
+<name>javax.jdo.option.ConnectionURL</name>
+<value>jdbc:mysql://localhost:3306/metastore?createDatabaseIfNotExist=true</value>
+<description>JDBC connect string for a JDBC metastore</description>
+</property>
+<property>
+<name>javax.jdo.option.ConnectionDriverName</name>
+<value>com.mysql.jdbc.Driver</value>
+<description>Driver class name for a JDBC metastore</description>
+</property>
+<property>
+<name>javax.jdo.option.ConnectionUserName</name>
+<value>root</value>
+<description>username to use against metastore database</description>
+</property>
+<property>
+<name>javax.jdo.option.ConnectionPassword</name>
+<value>root</value>
+<description>password to use against metastore database</description>
+</property>
+</configuration>
+    ```
+4. 启动 hive
+
+hive> create table aa(id int);
+
+在mysql中可以看到`元数据信息`。
+
+## hive 总结
+1. metadata,存在 mysql当中
+2. 相当于 hadoop的客户端
+3. 相当于 mysql 与 HDFS 的双射关系
+
+
+## Hive 交互常用命令
+
+1. ./bin/hive -help
+    ``` 
+    ./bin/hive -e "select * from aa" // 在 命令行之后 写 sql
+    ./bin/hive -f test.hql 后面跟 文件
+    ```
+2. dfs -ls /;
+    ```
+    hive> dfs -ls /;
+    Found 4 items
+    -rw-r--r--   3 houzhenguo supergroup         12 2020-03-01 17:07 /hello.txt
+    drwxr-xr-x   - houzhenguo supergroup          0 2020-03-01 17:14 /out
+    drwx-wx-wx   - houzhenguo supergroup          0 2020-03-01 19:40 /tmp
+    drwxr-xr-x   - houzhenguo supergroup          0 2020-03-01 19:43 /user
+    hive> 
+
+    ```
+
+    ## Hive 默认配置
+
+    1. 默认数据仓库的最原始的位置 在 hdfs上， /user/hive/warehouse/
+    2. 查询后信息显示配置
+
+        在 hive-site.xml 文件中添加如下配置信息，就可以实现显示当前数据库，以及查询
+        表的头信息配置。
+        ```xml
+            <property>
+                <name>hive.cli.print.header</name>
+                    <value>true</value></property>
+                <property>
+                    <name>hive.cli.print.current.db</name>
+                    <value>true</value>
+            </property>
+        ```
+        修改上述的配置信息之后，就可以 在 hive命令行看到 表和 列信息。不会影响执行效率，只是查看方便
+    
+    3. hive 运行日志信息
+        mv hive-log4j.properties.template hive-log4j.properties
+        /temp/houzhenguo/hive.log 默认
+        修改成 我们自己的地址 
+        ```xml
+        hive.log.threshold=ALL
+        hive.root.logger=INFO,DRFA
+        hive.log.dir=/home/houzhenguo/soft/bigdata/hive/logs
+        hive.log.file=hive.log
+
+        ```
+        重新启动hive 就可以在在配置路径下看到 log的相关日志了。
+    4. 参数配置方式
+        默认配置文件 hive-default.xml
+        用户自定义配置文件： hive-site.xml
+        用户自定义配置文件 会覆盖默认配置。
+        还可以通过命令行进行修改
+        ./bin/hive -hiveconf mapred.reduce.tasks=10  // 当前临时窗口会生效
+        hive> set mapred.reduce.tasks=20 // 在命令行也可以修改，在 启动也可以，命令行修改覆盖前面的
+
+---
+## Hive 数据类型
+### 基本数据类型
+
+![基本数据类型](../images/hive-3.png)
+
+对于 Hive 的String 类型相当于 数据库的 varchar类型，该类型是一个可变的字符串，理论上最多存储 2GB.
+
+### 集合数据类型
+
+了解就行，用的不多
+
+![集合数据类型](../images/hive-4.png)
+
+一般可以用 函数 将 负载的数据结构 扁平化处理。
+
+hive 解析数据在一行 ? 
