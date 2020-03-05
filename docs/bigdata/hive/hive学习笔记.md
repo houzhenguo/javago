@@ -268,3 +268,105 @@ hive> create table aa(id int);
 一般可以用 函数 将 负载的数据结构 扁平化处理。
 
 hive 解析数据在一行 ? 
+
+1. 建表
+
+
+    ```
+    create table test(
+    name string,
+    friends array<string>,
+    children map<string, int>,
+    address struct<street:string, city:string>
+    )
+    row format delimited fields terminated by ','
+    collection items terminated by '_'
+    map keys terminated by ':'
+    lines terminated by '\n';
+    ```
+2. 处理数据
+
+    创建 test.txt
+    ```
+    songsong,bingbing_lili,xiao song:18_xiaoxiao song:19,hui long guan_beijing
+yangyang,caicai_susu,xiao yang:18_xiaoxiao yang:19,chao yang_beijing
+    ```
+3. load 数据
+
+    hive (default)> load data local inpath '/home/houzhenguo/soft/bigdata/hive/data/test.txt' into table test;
+
+4. 查询
+    ```
+        hive (default)> select * from test;
+    OK
+    test.name	test.friends	test.children	test.address
+    songsong	["bingbing","lili"]	{"xiao song":18,"xiaoxiao song":19}	{"street":"hui long guan","city":"beijing"}
+    yangyang	["caicai","susu"]	{"xiao yang":18,"xiaoxiao yang":19}	{"street":"chao yang","city":"beijing"}
+    Time taken: 0.079 seconds, Fetched: 2 row(s)
+    hive (default)> 
+
+    ```
+5. 查询一条数据
+    ``` 
+    // 数组
+    hive (default)> select friends[1] from test;
+    OK
+    _c0
+    lili
+    susu
+    Time taken: 0.113 seconds, Fetched: 2 row(s)
+    hive (default)> 
+    // map 的查询
+    hive (default)> select children['xiao song'] from test;
+    OK
+    _c0
+    18
+    NULL
+    Time taken: 0.056 seconds, Fetched: 2 row(s)
+    hive (default)> 
+    // 结构体的访问
+    hive (default)> select address.city from test;
+    OK
+    city
+    beijing
+    beijing
+    Time taken: 0.054 seconds, Fetched: 2 row(s)
+    ```
+
+    以上生产环境用的比较少
+
+---
+
+## 类型转换
+
+    小级别的类型 可以转 高级别的
+    int -> bigint
+    string float string 可以转 double
+
+---
+
+---
+
+# DDL 数据定义语言
+
+关于库 和 表的增删改查,操作元数据
+
+## 1. 创建数据库
+
+    create database myhive; // 还可以指定 路径
+    show databases;
+
+![](../images/hive-5.png)
+
+    创建表
+
+    hive (myhive)> create table bb(id int)；
+
+## 查 
+
+    show databases like 'hive*';// 查询hive相关
+
+    desc database myhive;
+
+## 2. 表的相关操作
+
