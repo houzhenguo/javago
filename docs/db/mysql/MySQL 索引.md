@@ -134,6 +134,7 @@ mysql> select * from T where k=5;
 ## 如何查询一张表的所有索引？
 
 SHOW INDEX FROM T 查询表 T 所有索引。
+show index from table;
 
 ## MySQL 最多可以创建多少个索引列？
 
@@ -313,3 +314,40 @@ select f from t use index(dg) where day='2010-12-31' and group=18 and begintime<
 
 - 使用身份证倒序存储，这样设置前六位的意义就很大了；
 - 使用 hash 值，新创建一个字段用于存储身份证的 hash 值。
+
+## desc explain
+
+```sql
+desc select * from account where id =1;
+explain select * from account where id =1;
+mysql> explain select * from account where id =1;
++----+-------------+---------+-------+---------------+---------+---------+-------+------+-------+
+| id | select_type | table   | type  | possible_keys | key     | key_len | ref   | rows | Extra |
++----+-------------+---------+-------+---------------+---------+---------+-------+------+-------+
+|  1 | SIMPLE      | account | const | PRIMARY       | PRIMARY | 4       | const |    1 | NULL  |
++----+-------------+---------+-------+---------------+---------+---------+-------+------+-------+
+
+// 可以看到 以下没有使用索引的扫描行数 为 4行 
+mysql> explain select * from account where id =1;
++----+-------------+---------+-------+---------------+---------+---------+-------+------+-------+
+| id | select_type | table   | type  | possible_keys | key     | key_len | ref   | rows | Extra |
++----+-------------+---------+-------+---------------+---------+---------+-------+------+-------+
+|  1 | SIMPLE      | account | const | PRIMARY       | PRIMARY | 4       | const |    1 | NULL  |
++----+-------------+---------+-------+---------------+---------+---------+-------+------+-------+
+
+```
+
+![](../images/mysql-3.png)
+
+如上图，咱们把 user_id + org_id 联合索引的数据结构理解成一棵树，MySQL查找时，从左往右去查找。且纵向的每列数据都是从小到大排序的，比如 
+user_id 从上到下是排好序的。
+接下来我们以SQL语句为例，看看它的性能是否高效。
+1. select * from user where user_id = 1 and org_id = 10 【高效，能精确找到指定的行数】
+2. select * from user where org_id = 11 【没法查找了，性能低，可能全表扫描。但针对类似Case，MySQL可能会做个优化，就
+是把所有userId取出来，然后遍历下，因此扫描的数据行数可能等于userId的数量】
+3. select * from user where user_id = 3 【上图user_id只有1和2两个值，没有3，所以这个SQL性能高效，一次就查出结果为空】
+4. select * from user where user_id = 1 【会走索引，但返回数据的行数可能较多，需酌情处理】 
+5. select * from user where org_id > 1  【性能低，全表扫描】
+6. select * from user where user_id > 1  【会走索引，性能可能低】
+7. select * from user where user_id != 1  【只会查等于或者大于小于，不等于就没法查了，所以全表扫描，性能低】
+
