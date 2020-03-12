@@ -142,23 +142,14 @@
 
     - JdbcTemplateDemo2
 
-            /**
-             * The Basic Usage of JdbcTemplate
-             */
-            public class JdbcTemplateDemo {
-            
+            public class JdbcTemplateDemo2 {
                 public static void main(String[] args) {
-                    // prepare dataSource
-                    DriverManagerDataSource dataSource = new DriverManagerDataSource();
-                    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-                    dataSource.setUrl("jdbc:mysql://localhost:3306/eesy");
-                    dataSource.setUsername("root");
-                    dataSource.setPassword("HotteMYSQL");
-                    // 1. create the object of JdbcTemplate
-                    JdbcTemplate jdbcTemplate = new JdbcTemplate();
-                    jdbcTemplate.setDataSource(dataSource);
-                    // 2. execute operation
-                    jdbcTemplate.execute("insert into  account(name, money)values('aaa', 1000)");
+                    // 1. 获取容器
+                    ApplicationContext ac = new ClassPathXmlApplicationContext("bean.xml");
+                    // 2. 获取对象
+                    JdbcTemplate jt = ac.getBean("jdbcTemplate",JdbcTemplate.class);
+                    jt.execute("insert into  account(name, money)values('aaa2', 2000)");
+
                 }
             }
 
