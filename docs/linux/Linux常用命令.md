@@ -35,5 +35,8 @@ nohup command > myout.file 2>&1 &
 
 15. tail -500f xxx.log 实时查看最后 500行
 
+16. find / -type f -size +10G
+
+17.  `> main.log`
 ## 参考 
 [UNIX / LINUX CHEAT SHEET](http://cheatsheetworld.com/programming/unix-linux-cheat-sheet/)
