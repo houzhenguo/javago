@@ -59,3 +59,16 @@ Data: Historical and MiddleManager，负责实际的Ingestion负载和数据存�
 ![](../images/druid-2.png)
 
 
+Apache Doris核⼼功能 | 数据模型和物化视图 https://mp.weixin.qq.com/s/NGEefI4SeYeuxuggltSSMA
+
+Apache Kylin在美团数十亿数据OLAP场景下的实践
+
+https://mp.weixin.qq.com/s/QOmPnK03udfdor7g_6biaA
+
+Apache Kylin | 麒麟出没，必有祥瑞
+
+https://mp.weixin.qq.com/s/q9JzaDt-Hc8jBM9c8NfBDw
+
+从B+树到LSM树，及LSM树在HBase中的应用
+
+https://mp.weixin.qq.com/s/QuJ13VMs2LLMpFqdJBIaMg
