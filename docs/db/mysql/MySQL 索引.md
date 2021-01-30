@@ -351,3 +351,22 @@ user_id 从上到下是排好序的。
 6. select * from user where user_id > 1  【会走索引，性能可能低】
 7. select * from user where user_id != 1  【只会查等于或者大于小于，不等于就没法查了，所以全表扫描，性能低】
 
+
+
+
+### 覆盖索引使用实例 
+
+现在我创建了索引(username,age)，我们执行下面的 sql 语句
+
+```sql
+select username , age from user where username = 'Java' and age = 22
+```
+
+在查询数据的时候：要查询出的列在叶子节点都存在！所以，就不用回表。
+
+
+## 查询优化器偷偷干了哪些事儿
+
+1、如果建的索引顺序是 (a, b)。而查询的语句是 where b = 1 AND a = ‘陈哈哈’; 为什么还能利用到索引？
+
+  理论上索引对顺序是敏感的，但是由于 MySQL 的查询优化器会自动调整 where 子句的条件顺序以使用适合的索引，所以 MySQL 不存在 where 子句的顺序问题而造成索引失效。当然了，SQL书写的好习惯要保持，这也能让其他同事更好地理解你的SQL。
