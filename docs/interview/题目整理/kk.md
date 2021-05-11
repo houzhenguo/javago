@@ -47,6 +47,7 @@
 1、hashmap,hashtable的区别？hashmap数据结构？
 concurrentHashMap数据结构，是如何保证线程安全的？1.7 1.8两个版本的实现区别 ？
 concurrentHashMap是如何扩容的？是通过什么方式保证获取的size准确？
+https://blog.csdn.net/ZOKEKAI/article/details/90051567
 hashmap在1.7的时候有什么问题，【循环链表问题，丢数据问题】 ，如何解决这两个问题？ 头插法变成尾插法
 hashmap为什么链表长度大于8会变成红黑树，基于什么考虑的？
 为什么hashtable,currentHashMap的key和value不能为空？

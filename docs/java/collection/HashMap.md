@@ -16,6 +16,7 @@ static final int tableSizeFor(int cap) {
     return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
 }
 ```
+总结： 想让他低位全是1 +1 
 
 详解如下：
 
@@ -60,3 +61,43 @@ hash & (n-1) n为 2的次幂
 15 = 00000000000000000000000000001111
 ```
 So just the lowest 4 bits are set in 15. If you `&` this with another int, it will only allow bits in the last 4 bits of that number to be set in the result,` so the value will only be in the range 0-15`, so it's like doing % 16.
+
+
+## 其他
+1. 链表法 和开放地址法
+
+defalut 16 = 1<< 4
+factor  = 0.75
+tree_threshold = 8 转红黑树 +  min_tree_capacity = 64
+
+```java
+  static final int hash(Object key) {
+        int h;
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+    }
+```
+由于和（length-1）运算，length 绝大多数情况小于2的16次方。所以始终是hashcode 的低16位（甚至更低）参与运算。要是高16位也参与运算，会让得到的下标更加散列。
+
+### getNode
+```java
+    final Node<K,V> getNode(int hash, Object key) {
+        Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
+        if ((tab = table) != null && (n = tab.length) > 0 &&
+            (first = tab[(n - 1) & hash]) != null) {
+            if (first.hash == hash && // always check first node
+                ((k = first.key) == key || (key != null && key.equals(k))))
+                return first;
+            if ((e = first.next) != null) {
+                if (first instanceof TreeNode)
+                    return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+                do {
+                    if (e.hash == hash &&
+                        ((k = e.key) == key || (key != null && key.equals(k))))
+                        return e;
+                } while ((e = e.next) != null);
+            }
+        }
+        return null;
+    }
+```
+

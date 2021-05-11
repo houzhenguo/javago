@@ -2,6 +2,8 @@
 
 sort 练习
 
+1. 堆排序 快速排序 归并排序这个几种比较好，其中归并排序比较稳定，但是需要n的空间
+
 ```java
 // sort swap less
 public abstract class Sort<T extends Comparable<T>{
