@@ -2,6 +2,7 @@
 1. golang = golanguage
 2.  https://golang.org/ 官方网站
 3.  https://studygolang.com/pkgdoc  中文在线标准库文档 可以找一个离线版本
+4. 优秀网站 https://www.liwenzhou.com/posts/Go/Gin_framework/
 
 ## download
 1. https://golang.org/doc/install?download=go1.16.4.darwin-amd64.tar.gz
