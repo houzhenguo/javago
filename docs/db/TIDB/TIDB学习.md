@@ -13,6 +13,9 @@ https://tech.meituan.com/2018/11/22/mysql-pingcap-practice.html 美团技术团�
 
 https://juejin.cn/post/6844903622598197256 
 
+总结来看： 对硬件要求高，小数据量不适合使用，对分布式事务要求低的不适用，对读性能
+
+
 ## 特点
 1. 存储数据量大
 2. 写的快 LSM-Tree

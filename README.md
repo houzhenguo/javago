@@ -108,3 +108,18 @@ welcome to houzhenguo java learning
 - [Hadoop笔记](./docs/bigdata/hadoop/Hadoop笔记.md)
 
 010203
+
+test
+```mermaid
+graph TD
+    A(start) --> B[/input subtask and user/]
+    B --> C{need cross }
+    C -->|yes| D[calculate cross and noncross set]
+    C -->|no| E[calculate noncross set]
+    D --> F[assign subtask cross]
+    E --> G[assign subtask noncross]
+    F -->H[output subtask and user]
+    G -->H
+    H-->I
+    I(end)
+```
