@@ -99,3 +99,95 @@ golang 浮点型默认 float64
 	var n1 float64 = float64(i1)
 	fmt.Println(" n1 占用字节数：", unsafe.Sizeof(n1)) // 8
 ```
+
+## var
+```golang
+s, n := "abc", 123
+// 占位
+i := 0
+_ = i
+// 批量定义const
+const (
+	a =1
+	b ="ss"
+)
+const (
+	a1   byte = 127       // int to byte ,128会越界
+	//b1   int  = 1e20      // float64 to int, overflows
+)
+// iota的使用，自增+1
+const (
+	// 0-6
+	Sunday = iota
+	Monday
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
+)
+```
+
+## 类型转换
+1. 不支持隐式转换,需要做显式转换
+```golang
+var b byte = 100
+// var n int = b // Error: cannot use b (type byte) as type int in assignment \
+var n int = int(b) // 显式转换
+```
+## string
+1. 默认空字符串
+2. 可以使用索引访问某个字节
+3. 不可变
+```golang
+// 使用index
+s := "abc"
+println(s[0] == '\x61', s[1] == 'b', s[2] == 0x63)
+true,true,true
+// 转义，原封不动输出
+	s1 := `a
+b\r\n\x00
+c`
+	println(s1)
+```
++ 拼接必须在上一行末尾，否则编译不通过
+
+```golang
+s := "Hello, " +
+     "World!"
+s2 := "Hello, "
+    + "World!"    // Error: invalid operation: + untyped string
+```
+
+要修改字符串，可先将其转换成 []rune 或 []byte，完成后再转换为 string。⽆无论哪种转 换，都会重新分配内存，并复制字节数组。
+
+## 指针
+1. ⽀支持指针类型 *T，指针的指针 **T，以及包含包名前缀的 *<package>.T。
+- 默认值nil
+- 操作符 & 取变量地址， * 通过指针访问目标对象，注意空指针
+
+```golang
+	type data struct{ a int }
+	var d = data{1234}
+	var p *data
+	p = &d // 取地址
+
+	fmt.Printf("%p, %v\n", p, p.a) // 直接⽤用指针访问目标对象成员，无须转换。
+	fmt.Println(*p) // 访问对象
+```
+
+## 自定义类型
+具有相同声明的未命名类型被视为同⼀一类型。
+• 具有相同基类型的指针。
+• 具有相同元素类型和⻓长度的 array。
+• 具有相同元素类型的 slice。
+• 具有相同键值类型的 map。
+• 具有相同元素类型和传送⽅方向的 channel。
+• 具有相同字段序列 (字段名、类型、标签、顺序) 的匿名 struct。 • 签名相同 (参数和返回值，不包括参数名称) 的 function。
+• ⽅方法集相同 (⽅方法名、⽅方法签名相同，和次序⽆无关) 的 interface。
+
+```golang
+	var a3 struct { x int `a` }
+	var b3 struct { x int `a` }
+	fmt.Println(a3 == b3) // 这样是相等的，如果把其中一个a 改成ab 就编译不通过
+```
