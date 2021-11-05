@@ -264,6 +264,13 @@ git branch -d other
 - `git add -f <file> `强制提交已忽略的的文件
 - `git check-ignore -v <file> `检查为什么Git会忽略该文件
 
+git remote set-url origin https://<your_token>@github.com/<USERNAME>/<REPO>.git
+
+
+git stash push -m "stash 01 缓存"
+git stash apply 0
+git stash pop
+git stash list
 
 
 copyright houzhenguo 

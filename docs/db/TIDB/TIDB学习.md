@@ -1,5 +1,6 @@
 https://docs.pingcap.com/zh/tidb/v4.0/overview  TIDB 中文官网
 
+https://docs.pingcap.com/zh/tidb/v4.0/tidb-architecture
 
 https://pingcap.com/blog-cn/tidb-internal-1 三篇文章了解 TiDB 技术内幕 - 说存储
 
@@ -131,3 +132,8 @@ leader 也会想 PD汇报
 - Followers 的位置
 - 掉线 Replica 的个数
 - 数据写入/读取的速度
+
+
+## 场景
+1. 表/库 500G，一亿条数据
+2. 

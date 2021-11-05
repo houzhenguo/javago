@@ -191,3 +191,167 @@ s2 := "Hello, "
 	var b3 struct { x int `a` }
 	fmt.Println(a3 == b3) // 这样是相等的，如果把其中一个a 改成ab 就编译不通过
 ```
+
+## 一种类似别名的东西
+
+```golang
+    type myInt int64
+	var x myInt = 90
+	fmt.Println(x)
+	// ==== 分割 =====
+	var b2 = int64(x) // 必须显式转换，除⾮非是常量。
+	fmt.Printf("%T\n", b2) // int64 需要做显式转换
+	fmt.Printf("%T\n", x) // main.myInt
+```
+新类型`不是原类型的别名`，除拥有相同数据存储结构外，它们之间没有任何关系，不会持 有原类型任何信息。除⾮非⺫⽬目标类型是未命名类型，否则必须显式转换。
+
+```golang
+	a32 := []int{
+		1,
+		2, // 末尾以逗号结尾
+	}
+	a33 := []int{
+		1,
+		2} // 末尾以}结尾
+// 两种结尾方式都可以，但是不能}下一行，又没有逗号
+```
+
+## 控制语句if
+```golang
+	// 控制语句if
+	x11 :=10
+	if str := "hello"; x11 >0 {    // if 语句可以初始化 + 条件判断
+		fmt.Println(string(str[1]))
+	} else {
+		fmt.Println("not found")
+	} 
+```
+
+for
+
+```golang
+	for  {
+		fmt.Println("while")
+	}
+	for n >0 {
+		fmt.Println("while n>0")
+		n--
+	}
+	for range
+	
+	for i := 0 ;i<getLen();i++ { // getLen 会调用多次，需要在初始化的时候定义好
+
+	}
+
+func getLen() int{
+	fmt.Println("get len")
+	return 5
+}
+```
+
+## range 的坑
+
+https://studygolang.com/articles/15605?fr=sidebar
+
+```golang
+	type Foo struct {
+		Bar string
+	}
+
+	list := []Foo{Foo{"bar1"}, Foo{"bar2"}, Foo{"bar3"}}
+	for i, v := range list {
+		v.Bar = "change" + string(i) // v 是一个copy ,所以数据的修改不能反馈到之前的数据结构
+	}
+	fmt.Println(list)
+// 要使用以下方法进行修改
+for i, _ := range list {
+    list[i].Bar = "change" + string(i)
+}
+```
+
+## break
+```golang
+L1:
+	for x := 0; x < 3; x++ {
+	L2:
+		for y := 0; y < 5; y++ {
+			if y > 2 { continue L2 }
+			if x > 1 { break L1 }
+			print(x, ":", y, " ")
+		}
+		println() }
+	//0:0 0:1 0:2
+	//1:0 1:1 1:2
+```
+break 跳转到某个位置
+
+## function 编程
+
+```golang
+func main() {
+	result:= doSomething(func(a, b int) int {
+		return a +b
+	}, 4, 5)
+	fmt.Println(result)
+	result1:= doSomething(func(a, b int) int {
+		return a * b
+	}, 4, 5)
+	fmt.Println(result1)
+}
+type AddFun func(a, b int) int
+
+func doSomething(fun AddFun, a, b int) int {
+	d := fun(a, b)
+	fmt.Println("d is", d)
+	return d
+}
+```
+
+## 变长参数
+变长参数就是 slice，需要放在最后一个参数的位置。
+```golang
+func testParams(s string, n ...int) {
+	for i := range n {
+		fmt.Println(i)
+	}
+}
+```
+返回值作为行参
+```golang
+func add(x, y int) (z int) {
+	defer func() {
+		z = z+100 // 可以在defer 中进行修改
+	}()
+	z = x + y // 返回值可以作为形式参数，最后直接返回z即可
+	return // 可以通过 return  进行隐式返回
+}
+```
+
+## defer
+defer 报错怎么办
+```golang
+func testDefer(x int){
+	defer println("a")
+	defer println("b")
+	defer func() {
+		println(100/x) // error 会层层传导，不会打断defer输出
+	}()
+	defer println("c")
+}
+```
+滥用defer，比如在一个大循环中会导致性能问题。
+
+## recover
+```golang
+func testPanic(x int) {
+	defer func() {
+		if err := recover(); err != nil {
+			println(err.(string))
+			println("error 出现")
+
+		}
+	}()
+	println(100/x)
+}
+```
+如果在defer 中又出现了错误，只会出现最后一个。

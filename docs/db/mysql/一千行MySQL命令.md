@@ -422,6 +422,17 @@ e. HAVING 子句，条件子句
     where 不可以使用字段的别名，having 可以。因为执行WHERE代码时，可能尚未确定列值。
     where 不可以使用合计函数。一般需用合计函数才会用 having
     SQL标准要求HAVING必须引用GROUP BY子句中的列或用于合计函数中的列。
+
+WHERE 过滤行，HAVING 过滤分组，行过滤应当先于分组过滤。
+
+```sql
+SELECT col, COUNT(*) AS num
+FROM mytable
+WHERE col > 2
+GROUP BY col
+HAVING num >= 2;
+```
+
 f. ORDER BY 子句，排序子句
     order by 排序字段/别名 排序方式 [,排序字段/别名 排序方式]...
     升序：ASC，降序：DESC
