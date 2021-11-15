@@ -100,7 +100,6 @@ docker version  显示版本信息
 docker info     更加详细的信息 系统信息 镜像和容器的数量
 docker  --help 
 帮助文档地址：https://docs.docker.com/reference/
-![](./images/d2.png)
 
 ### 镜像命令
 1. docker images 查看本地本机上看
@@ -278,8 +277,6 @@ docker status 容器ID
 
 curl localhost:9200
 
-![](./images/d4.png)
-
 
 ## portainer
 
@@ -292,7 +289,7 @@ http://localhost:8088/#/init/admin
 
 ## docker 镜像加载原理
 1. unionFS 联合文件系统
-下载的时候看到的一层一层的就是 unionFS,是一种轻量级且高性能的文件系统
+下载的时候看到的一层一层的就是 unionFS,shi
 
 
 
