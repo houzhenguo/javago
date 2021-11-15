@@ -1,5 +1,7 @@
+# 相关链接
 https://www.bilibili.com/video/BV1og4y1q7M4?t=400&p=1  b站地址
 
+## 阿里云镜像加速
 https://docs.docker.com/engine/install/centos/  docker for centos
 国内换成阿里云的镜像，然后继续install
 ```shell
@@ -42,7 +44,7 @@ docker run的流程图
                 -> 下载镜像到本地 
                         -> 运行镜像
 
-
+# docker
 ## 底层原理
 1. Docker是一个 cs结构系统，Docker的守护进程运行的主机上，通过 Socket从客户端访问
 2. Docker server 从 client 接收到指令，就会执行这个指令。
@@ -287,14 +289,49 @@ docker run -d -p 8088:9000 --restart=always -v /var/run/docker.sock:/var/run/doc
 http://localhost:8088/#/init/admin
 
 
+### 镜像是什么
+镜像是一种轻量级，可执行的独立软件包，用来打包软件运行环境和基于运行环境开发的软件，包含运行某个软件所有的内容
+包括 代码 运行时，库，环境变量和配置文件。
+
+如何得到镜像
+1. from origin rep
+2. copy
+3. 制作镜像 dockerFile
+
 ## docker 镜像加载原理
 1. unionFS 联合文件系统
-下载的时候看到的一层一层的就是 unionFS,shi
+下载的时候看到的一层一层的就是 unionFS.分层，轻量级且高性能的文件系统，支持对文件系统的修改作为一次提交来一层层的叠加，
+同时可以将不同目录挂载到同一饿虚拟文件系统下。
+UFS是docker 镜像的基础。
+bootfs 系统启动引导加载，主要包含 bootloader 和kernel.bootloader 主要是引导加载kernel.linux 刚启动时候，会加载 bootfs
+文件系统，在docker镜像最底层就是 bootfs。当boot 加载完成之后就在整个内核的内存中了，此时内存多使用权已由bootfs 交给内核，此时系统
+也会卸载bootfs
+rootfs，在bootfs 之上，包含的就是典型的Linux系统中的 /dev/ /proc/ /bin /etc 等标准目录和文件，rootfs 就是各种不同的操作系统发行版。
+比如 ubuntu,centos
+
+对于一个精简OS,rootfs很小，只包含最基本的命令，工具和程序库就可以了，底层还是使用的是主机的内核，自己只需要 提供rootfs就可以了。
+
+## 理解
+1. 所有的docker 镜像都起始于一个基础镜像层，当进行修改或增加新的内容时，就会在当前的镜像层之上，创建新的镜像层。
+eg. 加入基于 ubuntu linux 创建一个新的镜像，这是新镜像的第一层，如果在该镜像中添加py包，就会添加第二层，如果继续添加一个安全补丁，
+就会创建第三个镜像层。
+
+![](./images/d2.png)
+![](./images/d4.png)
 
 
+## commit 镜像
+docker commit 提交容器成为一个新的副本。
+docker commit -m="提交的描述信息" -a="作者" 容器id 镜像名字 
 
+### 实战
+docker run -it -p 8089:8080 tomcat    # 启动一个默认的tomcat
+docker exec -it ccc6e0582540 /bin/bash # 进入容器
+cp -r webapps.dist/* ./webapps # copy到webapps才能访问
+docker commit -a="zhenguo" -m="add webapps" ccc6e0582540 tomcat02:1.0  # 提交
 
+![](./images/d5.png)
+之后就可以直接使用修改过的镜像。
 
-
-
-
+tomcat + 我们的一些操作 =》打包成一个新的镜像
+![](./images/d6.png)
