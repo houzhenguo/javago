@@ -237,6 +237,8 @@ docker cp e6765f4b6869:/home/test.java ./
 未来可以使用卷技术，可以实现和主机的打通
 
 
+docker exec -ti d5d039df430b redis-cli
+
 ## 练习
 docker 安装ng
 docker search nginx
