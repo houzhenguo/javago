@@ -6,13 +6,15 @@ Kafka 是 LinkedIn(领英) 开发的，前期主要用于处理海量的日志�
 Bilibili: https://www.bilibili.com/video/av65544753?from=search&seid=17708076357179732776
 
 ## 思维导图
+Kafka = N broker + N producer +N consumer + ZK
 1. broker
-    1. 存储数据
-    2. topic 逻辑概念，分区物理概念
+    1. 存储数据 -> 日志形式 append only + 顺序IO+ 日志段 + offset
+    2. topic 逻辑概念，分区物理概念-> 不同的topic 尽量不要用groupID,避免reblance
     3. 副本 备份 leader挂掉 ，isr 选出，同步时间进入 isr
-    4. 分区 kafka负载能力，消费的并行度
-    5. ack 数据丢失
+    4. 分区 kafka负载能力，消费的并行度-> 一个consumer只能消费一个分区
+    5. ack 数据丢失 -1 
     6. isr HW(消费者可见最大的offset)),LEO(LogEndOffset),消费一致性问题
+    7. follower 不对外提供任何服务
 2. producer
     1. 分区 规则，指定分区号优先按分区来，指定key按hash来,否则轮询
     2. ack 
@@ -25,6 +27,7 @@ Bilibili: https://www.bilibili.com/video/av65544753?from=search&seid=17708076357
 3. consumer
     1. 消费者组，消费者组内不同消费者不能消费同一个分区
     2. 分区分配策略问题
+    3. 同一个 group 尽量不要消费不同的topic
 
 ## 简介
 
@@ -402,6 +405,10 @@ leader 发生故障之后，会从 ISR 中选出一个新的 leader，之后，�
 同步数据。
 注意：这只能保证副本之间的数据一致性，并不能保证数据不丢失或者不重复。
 
+## Kafka为啥读取 follower?
+1. consumer 读取是在 某个partion进行读取，partion机制已经使它分布均衡了，
+它不像是 mysql 主从模型，读写压力都在master。
+2. 读取follower，复杂性更高，比如数据同步，比如 提交offset .
 ---
 
 # API

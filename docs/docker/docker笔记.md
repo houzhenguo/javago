@@ -337,3 +337,241 @@ docker commit -a="zhenguo" -m="add webapps" ccc6e0582540 tomcat02:1.0  # 提交
 
 tomcat + 我们的一些操作 =》打包成一个新的镜像
 ![](./images/d6.png)
+
+
+# 容器数据卷
+1. 如果数据在 容器中，那我们一删除数据就丢失了。
+2. 需要mysql数据可以存储在本地或者其他地方。
+容器之间可以有一个数据共享的技术。
+在Docker 容器中产生的数据同步到本地的。
+将容器内的目录挂在到Linux上面。
+
+总结：容器的持久化和同步操作，容器间也是可以数据共享的。
+
+## 使用数据卷
+1. 直接使用命令挂载 -v
+docker run -it -v 主机目录,容器目录  -p 主机端口:容器内端口
+
+docker run -it -v /Users/zhenguo.hou/test:/home centos /bin/bash
+
+docker inspect d8ea8425d937 查看容器的详细信息
+```json
+      "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/Users/zhenguo.hou/test", # 主机
+                "Destination": "/home", # docker 容器内
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ]
+```
+容器内部和外部进行了同步。
+
+$ docker start d8ea8425d937
+d8ea8425d937
+
+# zhengM in /home [15:59:06]
+$ docker attach d8ea8425d937
+
+容器关闭，在 主机上做 更新操作，只要容器还在，（虽然说容器关闭）
+但还是可以进行数据的同步。
+## 实战mysql
+1. 数据挂载
+
+docker run -d -p 3310:3306 -v /Users/zhenguo.hou/test/mysql/conf:/etc/mysql/conf.d -v /Users/zhenguo.hou/test/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root --name mysql01 mysql
+-d 后台运行
+-p 端口映射
+-v 数据卷挂载 可以多个
+-e 环境配置
+-name 容器名字
+
+启动成功之后，在本地使用客户端连接测试。
+
+使用client 创建一个db,发现在 /mysql/data  下也进行了创建
+
+## 匿名挂载
+-v 容器内路径(不指定主机)
+docker run -d -P --name nginx02 -v /etc/nginx nginx
+docker volume list
+查看所有的 volume 情况
+-P是随机映射端口
+![](./images/d7.png)
+上面的name 就是匿名的情况。我们在-v只写了容器内的路径，没有写容器外的路径。
+
+
+## 具名挂在
+指定一个名字
+docker run -d -P --name nginx02 -v juming-nginx:/etc/nginx nginx
+juming 只是个名字，没有目录(注意 )
+通过 -v 卷名:容器内路径
+
+查看一下卷的位置 
+docker volume inspect  juming-nginx
+
+![](./images/d8.png)
+所有的docker 容器内的卷，没有指定目录的情况下，都是在 /var/lib/docker/volumes/
+我们通过具名挂在可以方便的找到我们的一个卷，大多数情况下使用 具名挂在，不建议使用匿名挂载
+## 如何确定匿名挂载还是具名还是指定
+-v 容器内路径 匿名挂在
+-v 卷名:容器内路径 具名挂载
+-v /宿主机路径:容器内路径   指定路径挂载
+
+## 拓展
+通过 -v 容器内路径， ro,rw 改变读写权限
+ro readonly 只能通过宿主机操作，容器内部不能操作。
+rw 可读可写 
+一旦设定这个，容器对于挂载出来的内容就有限定了。
+
+# dockerFile
+1. dockerfile就是用来构建docker镜像的构建文件。
+通过一个脚本可以生成镜像，镜像是一层一层，脚本就是一个一个的命令，每个命令都是一层。
+## 自己创建docker file
+自己编一个dockerFile
+指令都是大写的，这里的每个命令就是镜像的一层。
+```
+
+FROM centos
+
+VOLUME ["/volume01","/volume02"]
+
+CMD echo "-------end-----"
+CMD /bin/bash
+```
+docker build -f dockerFile1 -t zhenguo/centos .
+注意最后的点
+```
+[root@aliyun dockertest]# docker build -f dockerFile01 -t zhenguo/centos .
+Sending build context to Docker daemon  2.048kB
+Step 1/4 : FROM centos
+ ---> 300e315adb2f
+Step 2/4 : VOLUME ["volume01","volume02"]
+
+ ---> Running in 8ccde9148ae5
+Removing intermediate container 8ccde9148ae5
+ ---> 5225d42124a5
+Step 3/4 : CMD echo "------end-----"
+ ---> Running in 13b1177bad0e
+Removing intermediate container 13b1177bad0e
+ ---> a318052ed77f
+Step 4/4 : CMD echo /bin/bash
+ ---> Running in 11ba6109fa21
+Removing intermediate container 11ba6109fa21
+ ---> 7e641547fa09
+Successfully built 7e641547fa09
+Successfully tagged zhenguo/centos:latest
+```
+
+
+
+使用docker images 可以看到刚才的 zhenguo/centos
+
+启动一下自己的容器
+
+docker run -it a18729da0b42 /bin/bash
+
+![](./images/d9.png)
+在生成镜像的时候自动挂载了。这个数据卷一定和外面有同步的目录。
+相当于匿名挂载。
+
+在容器外的目录
+```
+"Mounts": [
+            {
+                "Type": "volume",
+                "Name": "aa83eb792d493c1b165d25d41ffa38af5b2ab699b917cef03a7a4894898f4c00",
+                "Source": "/var/lib/docker/volumes/aa83eb792d493c1b165d25d41ffa38af5b2ab699b917cef03a7a4894898f4c00/_data",
+                "Destination": "/volume01",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "01312ceb7fa8bb9a134c01a15aa61d862dd8c382b0132e1031bbeee24fdc5445",
+                "Source": "/var/lib/docker/volumes/01312ceb7fa8bb9a134c01a15aa61d862dd8c382b0132e1031bbeee24fdc5445/_data",
+                "Destination": "/volume02",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ]
+```
+注意以下是 阿里云 centos
+```
+[root@aliyun ~]# cd /var/lib/docker/volumes/156289ecdd62f06687909cd10afa1cd0099b049fb0c70069c56cbaec4dc54ccb/
+[root@aliyun 156289ecdd62f06687909cd10afa1cd0099b049fb0c70069c56cbaec4dc54ccb]# ls
+_data
+[root@aliyun 156289ecdd62f06687909cd10afa1cd0099b049fb0c70069c56cbaec4dc54ccb]# cd _data/
+[root@aliyun _data]# ls
+[root@aliyun _data]#
+```
+
+![](./images/d10.png)
+
+## 数据卷容器
+1. 两个mysql 同步数据
+
+通过 --volumes-from 可以实现容器间的数据共享。
+可以做数据备份。软连接。
+
+容器之间可以做配置信息的传递，
+
+# DockerFile
+1. 编写dockerFile 文件
+2. docker build 构建一个镜像
+3. docker run 运行镜像
+4. docker push 发布镜像
+
+https://github.com/CentOS/sig-cloud-instance-images/blob/da050e2fc6c28d8d72d8bf78c49537247b5ddf76/docker/Dockerfile
+
+```
+FROM scratch
+ADD centos-6-docker.tar.xz /
+
+LABEL org.label-schema.schema-version="1.0" \
+    org.label-schema.name="CentOS Base Image" \
+    org.label-schema.vendor="CentOS" \
+    org.label-schema.license="GPLv2" \
+    org.label-schema.build-date="20180804"
+
+
+CMD ["/bin/bash"]
+```
+很多官方的镜像都是基础包，很多功能都没有，我们需要搭建自己的镜像。
+
+## dockerFile 构建过程
+基础知识：
+1. 每个保留关键字(指令)都必须是大写字母
+2. 指令从上到下
+3. # 表示注释
+4. 每个指令都会创建一个镜像层
+
+![](./images/d11.png)
+
+dockerfile 是面向开发的，我们之后要发布项目，做镜像，就需要编写dockerFile 文件，这个文件十分简单。
+Docker镜像逐渐成为企业交付的标准。
+
+DockerFile: 构建文件，定义了一切步骤，源代码
+DockerImages:通过 dockerFile 构建生成的一个镜像，这个是最终要发布和运行的产品
+比如原来是个jar，war. 
+Docker容器:容器是镜像运行起来提供服务器。
+
+### 命令
+1. FROM 指定基础镜像 centos,等
+2. MAINTAINER 维护者信息 姓名 和邮箱
+3. RUN 镜像构建的时刻需要运行的命令
+4. ADD 步骤，tomcat镜像，这个tomcat压缩包，添加内容
+5. WORKDIR 镜像的工作目录
+6. VOLUME 设置挂载卷
+7. EXPOSE 对外暴露端口
+8. CMD 指定这个容器启动的时候要运行的命令，CMD echo,只有最后一个会生效
+9. ENTRYPOINT 启动时候运行的命令，可以追加命令
+10. ONBUILD 当构建一个被继承的DockerFile的时候，就会运行ONBUILD ，触发指令。
+11. COPY 类似add.将我们的文件copy到镜像中。
+12. ENV 构建的时候设置环境变量
+
+
