@@ -239,6 +239,8 @@ docker cp e6765f4b6869:/home/test.java ./
 
 docker exec -ti d5d039df430b redis-cli
 
+docker run -d --name redis01 -p 6379:6379 redis
+
 ## 练习
 docker 安装ng
 docker search nginx
@@ -254,6 +256,13 @@ curl localhost:3344
 tomcat 
 
 docker run -d --name tomcat01 -p:8089:8080 tomcat
+
+docker run -d --name tomcat06 -p 8091:8080 -v /Users/zhenguo.hou/test/tingfeng:/usr/local/tomcat/webapps/ tomcat
+
+docker run -d --name tomcat01 -p 8080:8080 -v /home/houzhenguo/book/tingfeng:/usr/local/tomcat/webapps/ tomcat
+
+apt-get update
+apt-get install vim
 
 测试访问没有问题
 
@@ -575,3 +584,147 @@ Docker容器:容器是镜像运行起来提供服务器。
 12. ENV 构建的时候设置环境变量
 
 
+put /Users/zhenguo.hou/test/tingfeng/doc.tar.gz
+
+构建自己的dockerFile
+```
+FROM centos
+MAINTAINER zhenguo.hou@qq.com
+
+ENV MYPATH /usr/local
+WORKDIR $MYPATH
+
+RUN yum -y install vim
+RUN yum -y install net-tools
+
+EXPOSE 80
+
+CMD echo $MYPATH
+CMD echo "-------end-----"
+CMD /bin/bash
+```
+通过文件构建镜像。
+
+docker build -f mydockerfile-centos -t mycentos:0.1 .
+注意最后的点。
+
+测试运行
+
+docker run -it mycentos:0.1 
+
+## 测试CMD 和 ENTRYPOINT的却别
+测试cmd
+docker file
+```
+FROM centos
+CMD ["ls","-a"]
+```
+
+```
+FROM centos
+ENTRYPOINT ["ls","-a"]
+```
+构建镜像文件
+docker build -f cmdDockerFile -t cmdtest .
+run 运行  
+docker run cmdtest
+
+## 实战 tomcat
+1. 准备镜像文件 tomcat 压缩包 jdk压缩包
+2. 编写docker file 文件
+
+
+# Docker 网络
+理解Docker0
+
+1. 先移除之前的,晴空
+docker rm -f $(docker ps -aq)
+docker rmi -f $(docker images -a -q)
+
+2. ip addr
+![](./images/d12.png)
+三个网络
+
+docker 是如何处理容器网络访问的？
+
+3. 实验一下 tomcat 
+docker run -d -P --name tomcat01 tomcat
+查看容器内部的网络地址： ip addr
+
+docker exec -it tomcat01 ip addr
+
+执行如果报错，可以进入容器
+docker exec -it tomcat01 /bin/bash
+apt update && apt install -y iproute2
+
+查看ip 
+```
+[root@aliyun ~]# docker exec -it tomcat01 ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+14: eth0@if15: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
+    link/ether 02:42:ac:12:00:02 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 172.18.0.2/16 brd 172.18.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+```
+我们可以看到 docker 容器的ip 地址是 172.18.0.2
+我们可以使用Linux主机进行ping ,看是否能够ping通
+```
+[root@aliyun ~]# ping 172.18.0.2
+PING 172.18.0.2 (172.18.0.2) 56(84) bytes of data.
+64 bytes from 172.18.0.2: icmp_seq=1 ttl=64 time=0.064 ms
+64 bytes from 172.18.0.2: icmp_seq=2 ttl=64 time=0.058 ms
+```
+发现是可以ping 通的
+我们每启动一个 docker 容器，docker就会给docker容器分配一个ip
+我们只要安装了docker,就会有个网卡docker0，使用桥接模式,使用的技术是
+veth-pair 技术。
+再次测试 ip addr
+![](./images/d13.png)
+再启动一个tomcat
+
+docker run -d -P --name tomcat02 tomcat
+
+![](./images/d14.png)
+发现又多了一对网卡
+14 -> 15 在容器里面
+15: vethd6a3ef9@if14 
+15->14 在容器外面
+我们进入容器看一下。
+docker exec -it tomcat02 ip addr
+
+出现的网卡是一对一对的。
+
+使用的是veth-pair技术，就是一对虚拟设备接口
+正因为有了这个技术，我们使用这个技术充当桥梁
+连接各种网络虚拟设备。
+
+我们接下来测试 tomcat01 和tomcat02是否可以ping通
+
+docker exec -it tomcat02 ping 172.18.0.2
+
+容器和容器之间是可以互相ping通的。
+
+![](./images/d15.png)
+
+结论： tomcat01 和tomcat02是共用的一个路由器，docker0
+所有容器不指定网络的情况下，都是docker0路由的，docker会给我们的
+容器分配一个默认的可用ip
+0-255 
+255.255.0.1/16 
+00000000.00000000.  00000000.00000000
+255.255.0.0 
+一共有 255 * 255 -0.0 -255 大概 65535
+
+小结：
+docker使用的Linux的桥接。宿主机是docker容器的网桥，docker0
+
+![](./images/d16.png)
+
+docker 中所有的网络接口都是虚拟的，虚拟的转发效率高。
+只要容器删除，对应的网桥一对儿就没了。
+
+思考：每次启动容器，ip对可能就会发生变化，对于互相通信的容器来说，
+如何保证项目不重启，可以直接通信？
