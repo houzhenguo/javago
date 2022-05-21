@@ -728,3 +728,17 @@ docker 中所有的网络接口都是虚拟的，虚拟的转发效率高。
 
 思考：每次启动容器，ip对可能就会发生变化，对于互相通信的容器来说，
 如何保证项目不重启，可以直接通信？
+
+--link
+
+我们直接使用服务名字ping不通
+docker exec -it tomcat02 ping tomcat01
+这样是没办法直接ping通的
+如何解决呢？
+docker run -d -P --name tomcat03 --link tomcat01 tomcat
+
+我们开启 tomcat03 使用 --link
+
+apt-get install -y iputils-ping
+
+docker exec -it tomcat01 ping tomcat03
