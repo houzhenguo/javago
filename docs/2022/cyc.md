@@ -48,3 +48,5 @@ Balance Tree. 复杂度稳定，因为它所有的叶子结点都是主键ID，�
 索引可以将随机IO变成顺序IO.
 
 explain: system>const>eq_ref>ref>range>index>all
+
+test
